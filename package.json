@@ -1,0 +1,25 @@
+{
+  "name": "@divyanshu-iitian/dhaara",
+  "version": "0.1.0",
+  "description": "A lightweight terminal coding harness with staged edits, local Docker isolation, and evidence-backed completion.",
+  "type": "module",
+  "bin": { "dhaara": "bin/dhaara.js" },
+  "exports": { ".": "./src/index.js" },
+  "files": ["bin", "src", "sandbox", "examples", "docs", "README.md", "LICENSE", "SECURITY.md"],
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node bin/dhaara.js",
+    "test": "node --test test/*.test.js",
+    "test:sandbox": "node --test test/integration/*.test.js",
+    "check": "node scripts/check.mjs",
+    "demo": "node bin/dhaara.js demo",
+    "bench": "node scripts/bench.mjs",
+    "prepack": "npm run check"
+  },
+  "keywords": ["ai", "coding-agent", "agent-harness", "terminal", "cli", "sandbox", "docker", "ollama", "openrouter", "opencode", "local-first", "free-models", "developer-tools", "llm"],
+  "license": "MIT",
+  "author": "Divyanshu <https://github.com/divyanshu-iitian>",
+  "repository": { "type": "git", "url": "git+https://github.com/divyanshu-iitian/Divyansharness.git" },
+  "bugs": { "url": "https://github.com/divyanshu-iitian/Divyansharness/issues" },
+  "homepage": "https://github.com/divyanshu-iitian/Divyansharness#readme"
+}

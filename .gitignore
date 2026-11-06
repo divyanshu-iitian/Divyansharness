@@ -1,0 +1,9 @@
+node_modules/
+.dhaara/
+.env
+.env.*
+*.tgz
+coverage/
+artifacts/
+.DS_Store
+Thumbs.db
