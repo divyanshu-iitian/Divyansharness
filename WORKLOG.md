@@ -108,6 +108,23 @@ Added reproducible live evaluation, bridge usage/final-stop receipts, finished R
 vector branding, usage/troubleshooting and published evaluation methodology/results.
 Release packaging and latest-commit CI are the remaining release gate.
 
+## 08 — Package installation, source polish and release gate
+
+Installed the checkpoint-07 tarball in a separate temporary npm prefix. Its actual
+`dhaara` command passed version, real-Docker demo, diff review and verified apply
+against the demo's disposable project. The packaged command works independently
+of the source checkout. All seven CI jobs on checkpoint 07 passed.
+
+Formatted source for maintainability, retaining zero runtime npm dependencies.
+Final overhead sample: 145 ms median startup, 48.8 MB import RSS, 77,166 source bytes;
+raw data is published. Rendered and inspected the README SVG with Playwright.
+Added changelog, optional bridge-image CI and a real isolated CLI startup check.
+
+Post-format validation: 33 unit tests passed, 1 Windows symlink skip; 22 modules
+syntax checked; official bridge image smoke passed. Five real Docker integration
+tests also passed during release preparation. A fresh final tarball, checksum and
+tagged release follow this checkpoint after its CI completes.
+
 ## Provider research decision
 
 OpenCode's current [inference documentation](https://opencode.ai/docs/console/api/inference/)

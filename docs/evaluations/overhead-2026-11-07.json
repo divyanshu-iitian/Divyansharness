@@ -1,0 +1,28 @@
+{
+  "kind": "local-cli-overhead-not-model-benchmark",
+  "version": "0.1.0",
+  "node": "v25.2.1",
+  "platform": "win32",
+  "arch": "x64",
+  "cpu": "13th Gen Intel(R) Core(TM) i5-13420H",
+  "measuredAt": "2026-11-06T20:44:02.061Z",
+  "runtimeDependencies": 0,
+  "sourceBytes": 77166,
+  "startupMs": [
+    160,
+    156.8,
+    103.2,
+    145,
+    184.5,
+    133.2,
+    125.8
+  ],
+  "medianStartupMs": 145,
+  "importedCLI": {
+    "rss": 48795648,
+    "heapTotal": 8261632,
+    "heapUsed": 5681384,
+    "external": 2389773,
+    "arrayBuffers": 24855
+  }
+}

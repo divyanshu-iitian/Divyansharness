@@ -162,9 +162,9 @@ Run `dhaara --model YOUR_LOCAL_MODEL` for the terminal conversation. Commands:
 
 ## Small core, honest resource costs
 
-About **65 KB of runtime source**, seven tools, zero runtime npm dependencies.
-Two seven-run Windows batches observed **70–107 ms median** CLI startup and
-**49–57 MB RSS** after importing the CLI. These are machine-specific observations;
+About **78 KB of runtime source**, seven tools, zero runtime npm dependencies.
+A final seven-run Windows batch observed **145 ms median** CLI startup and
+**49 MB RSS** after importing the CLI. These are machine-specific observations;
 reproduce with `npm run bench`. [Method and environment](docs/EVALUATION.md).
 
 Docker and model inference are **additional** costs. Native command containers

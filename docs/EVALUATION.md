@@ -50,12 +50,18 @@ another process. Two Windows batches observed median startup of 69.6 and 107.3 m
 RSS of 48.8 and 57.2 MB, and about 65 KB runtime source after hardening. Results vary
 with machine load. Docker, image storage, model loading/inference memory are excluded.
 
+After formatting the source for readability, the final seven-run batch measured
+**145 ms median, 48.8 MB RSS, 77,166 source bytes**. Formatting added whitespace,
+not dependencies. [Final raw overhead report](evaluations/overhead-2026-11-07.json).
+
 ## Automated checks
 
 - 34 unit/protocol tests at checkpoint 07: 33 passed locally, one skipped for missing
   Windows symlink privilege. Linux CI exercises that case.
 - Five real Docker tests cover isolation, readonly plan mode, timeout cleanup,
   cancellation cleanup and the scripted end-to-end demo.
+- An optional-image smoke test checks the pinned official OpenCode CLI version and
+  automation flags inside the restricted sandbox used by the bridge.
 - CI runs Node 22/24 on Linux, macOS and Windows plus real Docker on Linux.
   Consult the live workflow for the current commit.
 

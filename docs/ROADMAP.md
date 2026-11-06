@@ -9,7 +9,8 @@
 - [x] Official OpenCode bridge integration
 - [x] Session recovery and bounded context
 - [x] Adversarial tests and cross-platform CI
-- [ ] Publish first release after CI and package smoke tests
+- [x] Package installation and complete demo/diff/apply smoke test
+- [ ] Same-model comparisons before promoting the experimental release
 
 ## Evidence before expansion
 

@@ -32,3 +32,13 @@ jobs:
       - run: docker pull node:22-alpine
       - run: npm run test:sandbox
       - run: node bin/dhaara.js demo --json
+  bridge:
+    name: Official OpenCode image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node bin/dhaara.js sandbox setup --bridge
+      - run: npm run test:bridge
