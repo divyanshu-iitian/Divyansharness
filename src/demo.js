@@ -50,7 +50,7 @@ export class DemoProvider {
   }
 }
 export async function demo({ onEvent, signal } = {}) {
-  const root = await mkdtemp(path.join(os.tmpdir(), 'dhaara-demo-'));
+  const root = await mkdtemp(path.join(os.tmpdir(), 'divyansharness-demo-'));
   const example = fileURLToPath(new URL('../examples/tiny-bug/', import.meta.url));
   await cp(example, root, { recursive: true });
   const session = await createSession(root, { verify: ['node --test'] });

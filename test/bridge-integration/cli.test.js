@@ -7,7 +7,7 @@ import { DockerSandbox } from '../../src/sandbox.js';
 import { BRIDGE_IMAGE } from '../../src/bridge.js';
 
 test('official CLI starts with bridge isolation and supports the selected automation flags', async () => {
-  const directory = await mkdtemp(path.join(os.tmpdir(), 'dhaara-bridge-image-'));
+  const directory = await mkdtemp(path.join(os.tmpdir(), 'divyansharness-bridge-image-'));
   try {
     const sandbox = new DockerSandbox(directory, { image: BRIDGE_IMAGE, memory: 1024 });
     const version = await sandbox.run('opencode --version');
@@ -20,7 +20,7 @@ test('official CLI starts with bridge isolation and supports the selected automa
   } finally {
     const resolved = path.resolve(directory);
     assert.equal(path.dirname(resolved), path.resolve(os.tmpdir()));
-    assert.ok(path.basename(resolved).startsWith('dhaara-bridge-image-'));
+    assert.ok(path.basename(resolved).startsWith('divyansharness-bridge-image-'));
     await rm(resolved, { recursive: true, force: true });
   }
 });

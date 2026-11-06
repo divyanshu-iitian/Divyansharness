@@ -139,7 +139,7 @@ export async function verify(session, sandbox, { signal, onEvent = () => {} } = 
       ok: !session.options.requireVerification,
       verified: false,
       message:
-        'No verification command configured. Review manually or run dhaara verify SESSION --verify "command". Applying requires --allow-unverified.',
+        'No verification command configured. Review manually or run divyansharness verify SESSION --verify "command". Applying requires --allow-unverified.',
     };
   }
   for (const command of commands) {

@@ -5,7 +5,7 @@ import { atomicJSON, uid, assert } from './util.js';
 import { snapshot } from './workspace.js';
 
 export const home = () =>
-  path.resolve(process.env.DHAARA_HOME || path.join(os.homedir(), '.dhaara'));
+  path.resolve(process.env.DIVYANSHARNESS_HOME || process.env.DHAARA_HOME || path.join(os.homedir(), '.divyansharness'));
 export async function createSession(workspace, options = {}) {
   const id = uid(),
     dir = path.join(home(), 'sessions', id);
@@ -35,7 +35,7 @@ export async function createSession(workspace, options = {}) {
 export async function loadSession(id) {
   assert(
     typeof id === 'string' && /^[a-z0-9]+-[a-f0-9]{10}$/.test(id),
-    'Invalid session ID. Use dhaara sessions.',
+    'Invalid session ID. Use divyansharness sessions.',
   );
   const dir = path.join(home(), 'sessions', id);
   const session = JSON.parse(await readFile(path.join(dir, 'session.json'), 'utf8'));

@@ -3,7 +3,7 @@ const color = process.stdout.isTTY && !process.env.NO_COLOR;
 const c = (code, text) => (color ? `\x1b[${code}m${text}\x1b[0m` : text);
 export function banner() {
   console.log(
-    `\n  ${c('1;36', 'dhaara')} ${c('2', `v${VERSION}`)}\n  ${c('2', 'Think freely. Change deliberately.')}\n`,
+    `\n  ${c('1;36', 'divyansharness')} ${c('2', `v${VERSION}`)}\n  ${c('2', 'Think freely. Change deliberately.')}\n`,
   );
 }
 export function renderer(json = false) {
@@ -60,9 +60,9 @@ export function receipt(session, json = false) {
   }
   const next =
     session.status === 'verified'
-      ? `Apply   dhaara apply ${session.id}`
-      : `Verify  dhaara verify ${session.id} --verify "your test command"`;
+      ? `Apply   divyansharness apply ${session.id}`
+      : `Verify  divyansharness verify ${session.id} --verify "your test command"`;
   console.log(
-    `  Original files unchanged.\n  Review  dhaara diff ${session.id}\n  ${next}\n  Resume  dhaara resume ${session.id} "continue"\n`,
+    `  Original files unchanged.\n  Review  divyansharness diff ${session.id}\n  ${next}\n  Resume  divyansharness resume ${session.id} "continue"\n`,
   );
 }

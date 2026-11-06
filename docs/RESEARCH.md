@@ -3,7 +3,7 @@
 These sources informed independently written code. Feature ideas do not establish
 superiority, and old benchmark percentages do not establish current rankings.
 
-| Source | Useful finding | Dhaara decision |
+| Source | Useful finding | Divyansharness decision |
 |---|---|---|
 | [Pi](https://github.com/earendil-works/pi) | Small extensible agent core | Native Node modules; no runtime package dependencies |
 | [Oh My Pi editing experiment](https://stencil.so/blog/the-harness-problem) | Edit format materially changes some models' reliability; not all models improve | Whole-file SHA-256 plus numbered range edits; retain a full replacement path |
@@ -29,7 +29,7 @@ superiority, and old benchmark percentages do not establish current rankings.
 
 ## Next experiments
 
-Compare native Dhaara against pinned OpenCode and DeepSeek Harness releases with
+Compare native Divyansharness against pinned OpenCode and DeepSeek Harness releases with
 the same model, tasks, tool access, token/time budgets and held-out verifiers.
 Repeat runs and publish failures, costs and timings. Ablate hashed range edits,
 verification feedback and context limits individually before claiming a benefit.

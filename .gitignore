@@ -1,5 +1,5 @@
 node_modules/
-.dhaara/
+.divyansharness/
 .env
 .env.*
 *.tgz

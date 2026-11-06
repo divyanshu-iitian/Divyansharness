@@ -17,8 +17,8 @@ one run cannot estimate general coding ability.
 | Native Ollama | qwen2.5:1.5b | Failed; stopped as `stalled`; no files changed | 19.4 s | 5,383 / 347 |
 | Native Ollama | qwen2.5:3b | Model load failed; CUDA allocation error | Not scored | No completed inference |
 
-The bridge reported $0 model cost. This is **OpenCode's loop** inside Dhaara's
-staging/container/verification boundary, not a result for Dhaara's native loop.
+The bridge reported $0 model cost. This is **OpenCode's loop** inside Divyansharness's
+staging/container/verification boundary, not a result for Divyansharness's native loop.
 An earlier bridge smoke also passed visible tests. An earlier 1.5B run exhausted
 eight turns; that failure motivated clearer schemas and stall detection. These
 were development runs, not a preregistered benchmark. [Raw smoke reports](evaluations/smoke-2026-11-07.json).

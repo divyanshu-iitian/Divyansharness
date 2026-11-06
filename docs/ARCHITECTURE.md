@@ -33,7 +33,7 @@ flowchart LR
 **Copy first.** Reading the repository creates a bounded snapshot. The agent can
 experiment without changing the original. Dependency directories and known secret
 paths are excluded. Default limits are 5,000 files, 64 MiB total, 1 MiB per file.
-`.dhaaraignore` supports simple `*` and `?` path patterns, not full gitignore syntax.
+`.divyansharnessignore` supports simple `*` and `?` path patterns, not full gitignore syntax.
 Ignored files aren't copied or deleted by apply. Changes to ignore rules inside
 the stage cannot hide edits from the reviewer.
 
@@ -70,6 +70,6 @@ limits are bounded-retried without switching to paid models. The first release
 supports Chat Completions providers, not arbitrary Responses/Anthropic APIs.
 
 OpenCode free models currently require its official client. The bridge is an
-explicitly separate backend: OpenCode owns its model loop; Dhaara owns staging,
-outer container limits, verification and apply. It is not a claim that Dhaara's
+explicitly separate backend: OpenCode owns its model loop; Divyansharness owns staging,
+outer container limits, verification and apply. It is not a claim that Divyansharness's
 native loop can directly use restricted OpenCode APIs.

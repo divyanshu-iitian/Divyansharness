@@ -8,7 +8,7 @@ import { VERSION } from '../src/util.js';
 const samples = [];
 for (let i = 0; i < 7; i++) {
   const start = performance.now();
-  const r = spawnSync(process.execPath, ['bin/dhaara.js', '--version'], { encoding: 'utf8' });
+  const r = spawnSync(process.execPath, ['bin/divyansharness.js', '--version'], { encoding: 'utf8' });
   if (r.status !== 0) throw new Error(r.stderr);
   samples.push(performance.now() - start);
 }

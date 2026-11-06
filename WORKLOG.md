@@ -125,6 +125,15 @@ syntax checked; official bridge image smoke passed. Five real Docker integration
 tests also passed during release preparation. A fresh final tarball, checksum and
 tagged release follow this checkpoint after its CI completes.
 
+## 09 — Restore the requested name; remove the installed preview
+
+User requested the original name and a chat-first terminal experience. Uninstalled
+the globally installed `@divyanshu-iitian/dhaara@0.1.0` with npm and verified that
+the `dhaara` command is absent. Repository, Docker images and saved sessions remain.
+Renamed the current package, executable, UI and documentation to **Divyansharness**.
+The original v0.1.0 release remains a historical artifact; v0.2.0 development follows.
+Legacy environment names remain accepted for explicit migration.
+
 ## Provider research decision
 
 OpenCode's current [inference documentation](https://opencode.ai/docs/console/api/inference/)

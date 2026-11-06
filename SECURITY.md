@@ -6,19 +6,19 @@ Do not include secrets or exploit other people's systems in a public issue.
 
 ## Boundaries
 
-Dhaara's native command tool runs only in a local Docker **Linux** container.
+Divyansharness's native command tool runs only in a local Docker **Linux** container.
 There is no unsandboxed fallback. The original working tree, Docker socket,
 provider keys, SSH agent and home directory are not mounted. Containers have a
 read-only root filesystem, all capabilities dropped, no-new-privileges, PID/CPU/
 memory limits, and a bounded temporary filesystem. Outbound networking is off
 unless the user passes `--network`. Containers are removed after completion,
 timeout and cancellation. A host crash can still leave one running; inspect
-`docker ps --filter label=dev.dhaara.managed=true` and remove only the named
-Dhaara container you intend to stop.
+`docker ps --filter label=dev.divyansharness.managed=true` and remove only the named
+Divyansharness container you intend to stop.
 
 File tools operate on a staged copy. They reject traversal, symlinks, Windows
 device names and alternate streams. Snapshot and apply omit known secret filenames,
-`.git`, dependency directories, and configured `.dhaaraignore` entries. This is
+`.git`, dependency directories, and configured `.divyansharnessignore` entries. This is
 not a secret scanner: secrets embedded in ordinary source files are still source.
 Inspect what you give to an agent, especially before using a remote provider.
 
@@ -36,7 +36,7 @@ Inspect what you give to an agent, especially before using a remote provider.
 - Verification commands execute project code. A passing command is evidence of
   that command passing, not proof of correctness or protection against a model
   weakening tests. Use external/held-out tests for evaluations.
-- Session files, staged sources and logs stay in `DHAARA_HOME` and may contain
+- Session files, staged sources and logs stay in `DIVYANSHARNESS_HOME` and may contain
   sensitive source data. They are not encrypted. Do not publish them wholesale.
 - Apply checks all conflicts before beginning and rechecks each file before
   replacement. Multi-file application is not an OS-level atomic transaction.
@@ -49,7 +49,7 @@ Inspect what you give to an agent, especially before using a remote provider.
 
 ## Provider access
 
-Dhaara does not spoof OpenCode client identities, extract subscription tokens,
+Divyansharness does not spoof OpenCode client identities, extract subscription tokens,
 ship shared API keys, or evade usage restrictions. Free services can rate-limit,
 change prices, change terms, or disappear. OpenRouter native free mode validates
 zero pricing, requests zero maximum prompt/completion price, and sends no paid

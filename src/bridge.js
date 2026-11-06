@@ -4,7 +4,7 @@ import { listModels } from './providers.js';
 import { verify } from './tools.js';
 import { assert } from './util.js';
 
-export const BRIDGE_IMAGE = 'dhaara-opencode:2.2.5';
+export const BRIDGE_IMAGE = 'divyansharness-opencode:2.2.5';
 // Inspect every event, including those evicted from the bounded output tail.
 export function bridgeEvents() {
   let buffer = '',
@@ -62,7 +62,7 @@ export async function bridge(workspace, prompt, options, { signal, onEvent = () 
   const model = options.model ?? models.find((m) => m.id === 'big-pickle')?.id ?? models[0]?.id;
   assert(
     models.some((m) => m.id === model),
-    'Select a currently free OpenCode model with dhaara models --provider opencode.',
+    'Select a currently free OpenCode model with divyansharness models --provider opencode.',
   );
   const session = await createSession(workspace, { ...options, provider: 'opencode-bridge' });
   const release = await lock(session);
@@ -78,12 +78,12 @@ export async function bridge(workspace, prompt, options, { signal, onEvent = () 
     await sandbox.prepare();
     session.status = 'running';
     await save(session);
-    const environment = { DHAARA_BRIDGE_MODEL: `opencode/${model}`, DHAARA_BRIDGE_PROMPT: prompt };
+    const environment = { DIVYANSHARNESS_BRIDGE_MODEL: `opencode/${model}`, DIVYANSHARNESS_BRIDGE_PROMPT: prompt };
     if (process.env.OPENCODE_API_KEY) environment.OPENCODE_API_KEY = process.env.OPENCODE_API_KEY;
     await event(session, 'bridge_start', { model: session.model, image: sandbox.resolvedImage });
     const events = bridgeEvents();
     const result = await sandbox.run(
-      'mkdir -p "$HOME" && opencode run --standalone --auto --format json --model "$DHAARA_BRIDGE_MODEL" "$DHAARA_BRIDGE_PROMPT"',
+      'mkdir -p "$HOME" && opencode run --standalone --auto --format json --model "$DIVYANSHARNESS_BRIDGE_MODEL" "$DIVYANSHARNESS_BRIDGE_PROMPT"',
       {
         signal,
         environment,
@@ -118,7 +118,7 @@ export async function bridge(workspace, prompt, options, { signal, onEvent = () 
       'OpenCode returned no final stop event. Inspect the saved session before retrying.',
     );
     session.summary =
-      'Official OpenCode run completed. Dhaara independently checked the staged workspace.';
+      'Official OpenCode run completed. Divyansharness independently checked the staged workspace.';
     // Verification defaults back to offline isolation, even though inference needed network.
     const checker = new DockerSandbox(session.stage, {
       image: options.verifyImage ?? 'node:22-alpine',

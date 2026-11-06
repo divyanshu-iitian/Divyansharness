@@ -15,7 +15,7 @@ import {
 } from '../src/workspace.js';
 
 async function fixture(t, files = { 'a.js': 'one\ntwo\nthree\n' }) {
-  const dir = await mkdtemp(path.join(os.tmpdir(), 'dhaara-test-'));
+  const dir = await mkdtemp(path.join(os.tmpdir(), 'divyansharness-test-'));
   t.after(() => rm(dir, { recursive: true, force: true }));
   const original = path.join(dir, 'source'),
     stage = path.join(dir, 'stage'),
@@ -35,7 +35,7 @@ test('snapshot excludes secrets, dependencies and ignore patterns', async (t) =>
     'nested/.env.local': 'SECRET',
     'key.pem': 'SECRET',
     'node_modules/pkg/x.js': 'x',
-    '.dhaaraignore': 'generated/\n',
+    '.divyansharnessignore': 'generated/\n',
     'generated/x': 'skip',
   });
   assert.deepEqual(Object.keys(s.files), ['a.js']);
@@ -135,7 +135,7 @@ test('verified apply adds, edits and deletes files', async (t) => {
 });
 test('agent-created ignore rules cannot hide staged changes', async (t) => {
   const s = await fixture(t);
-  await writeFile(path.join(s.stage, '.dhaaraignore'), '*');
+  await writeFile(path.join(s.stage, '.divyansharnessignore'), '*');
   await writeFile(path.join(s.stage, 'a.js'), 'changed');
   assert.equal((await changes(s)).length, 1);
   assert.equal(Object.keys(await inventory(s.stage)).length, 1);

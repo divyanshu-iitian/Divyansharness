@@ -1,4 +1,4 @@
-# Contributing to Dhaara
+# Contributing to Divyansharness
 
 The product goal is simple: finish useful coding tasks with less machinery and
 give the user a reviewable, reproducible result.
@@ -11,7 +11,7 @@ npm run check
 npm test
 docker pull node:22-alpine
 npm run test:sandbox
-node bin/dhaara.js demo
+node bin/divyansharness.js demo
 ```
 
 Keep changes focused. For a bug, add a regression that would have caught it.

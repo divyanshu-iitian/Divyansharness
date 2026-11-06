@@ -1,10 +1,10 @@
 {
-  "name": "@divyanshu-iitian/dhaara",
-  "version": "0.1.0",
+  "name": "@divyanshu-iitian/divyansharness",
+  "version": "0.2.0",
   "description": "A lightweight terminal coding harness with staged edits, local Docker isolation, and evidence-backed completion.",
   "type": "module",
   "bin": {
-    "dhaara": "bin/dhaara.js"
+    "divyansharness": "bin/divyansharness.js"
   },
   "exports": {
     ".": "./src/index.js"
@@ -27,12 +27,12 @@
     "node": ">=22"
   },
   "scripts": {
-    "start": "node bin/dhaara.js",
+    "start": "node bin/divyansharness.js",
     "test": "node --test --test-concurrency=1 test/*.test.js",
     "test:sandbox": "node --test test/integration/*.test.js",
     "test:bridge": "node --test test/bridge-integration/*.test.js",
     "check": "node scripts/check.mjs",
-    "demo": "node bin/dhaara.js demo",
+    "demo": "node bin/divyansharness.js demo",
     "bench": "node scripts/bench.mjs",
     "eval:smoke": "node scripts/eval-smoke.mjs",
     "prepack": "npm run check"

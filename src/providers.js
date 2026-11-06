@@ -57,7 +57,7 @@ export async function resolveProvider(options = {}) {
   const kind = options.provider || 'ollama';
   if (kind === 'opencode')
     throw new Error(
-      'OpenCode free models require the official CLI. Use: dhaara bridge "your task". Native free cloud mode: --provider openrouter.',
+      'OpenCode free models require the official CLI. Use: divyansharness bridge "your task". Native free cloud mode: --provider openrouter.',
     );
   assert(
     ['ollama', 'openrouter', 'compatible'].includes(kind),
@@ -70,7 +70,7 @@ export async function resolveProvider(options = {}) {
     kind === 'openrouter'
       ? process.env.OPENROUTER_API_KEY
       : kind === 'compatible'
-        ? process.env.DHAARA_API_KEY
+        ? (process.env.DIVYANSHARNESS_API_KEY || process.env.DHAARA_API_KEY)
         : undefined;
   if (kind === 'openrouter')
     assert(
@@ -100,7 +100,7 @@ export async function resolveProvider(options = {}) {
     const chosen = model ? models.find((m) => m.id === model) : models[0];
     assert(
       chosen,
-      `Model ${model} is not in the ${kind === 'openrouter' ? 'current free tool-capable' : 'local'} catalog. Run dhaara models --provider ${kind}.`,
+      `Model ${model} is not in the ${kind === 'openrouter' ? 'current free tool-capable' : 'local'} catalog. Run divyansharness models --provider ${kind}.`,
     );
     model = chosen.id;
     context = chosen.context ?? 32000;
@@ -171,7 +171,7 @@ export class ChatProvider {
     if (this.apiKey) headers.authorization = `Bearer ${this.apiKey}`;
     if (this.kind === 'openrouter') {
       headers['HTTP-Referer'] = 'https://github.com/divyanshu-iitian/Divyansharness';
-      headers['X-Title'] = 'Dhaara';
+      headers['X-Title'] = 'Divyansharness';
     }
     let response;
     for (let attempt = 0; attempt < 3; attempt++) {

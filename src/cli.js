@@ -12,9 +12,9 @@ import { bridge, BRIDGE_IMAGE } from './bridge.js';
 import { banner, renderer, receipt } from './ui.js';
 import { VERSION, assert, integer, exec, safeText } from './util.js';
 
-const HELP = `Dhaara ${VERSION} — Think freely. Change deliberately.
+const HELP = `Divyansharness ${VERSION} — Think freely. Change deliberately.
 
-Usage: dhaara [command] [task or session] [options]
+Usage: divyansharness [command] [task or session] [options]
 
   run "task"                  Work in a staged copy; never auto-apply
   plan "task"                 Read-only exploration in a sandbox
@@ -49,7 +49,7 @@ Options:
 
 Native OpenRouter mode selects only zero-price :free models with tools.
 Set OPENROUTER_API_KEY. No automatic paid fallback. Limits still apply.
-Compatible mode uses DHAARA_API_KEY and may incur provider charges.
+Compatible mode uses DIVYANSHARNESS_API_KEY and may incur provider charges.
 OpenCode free models require the official CLI bridge; no direct API bypass.
 
 Run without arguments in a terminal for interactive mode.
@@ -108,7 +108,7 @@ async function withCancellation(fn) {
   }
 }
 async function nativeRun(command, prompt, config, cwd, onEvent, signal, id) {
-  assert(prompt || id, 'Provide a task, for example: dhaara run "Fix the failing tests"');
+  assert(prompt || id, 'Provide a task, for example: divyansharness run "Fix the failing tests"');
   let session;
   if (id) {
     session = await loadSession(id);
@@ -177,7 +177,7 @@ export async function main(args = process.argv.slice(2)) {
     return;
   }
   if (command === 'sandbox') {
-    assert(rest[0] === 'setup', 'Use dhaara sandbox setup [--bridge].');
+    assert(rest[0] === 'setup', 'Use divyansharness sandbox setup [--bridge].');
     const build = v.bridge;
     const dockerfile = fileURLToPath(new URL('../sandbox/Dockerfile.opencode', import.meta.url));
     const r = await exec(
@@ -265,7 +265,7 @@ export async function main(args = process.argv.slice(2)) {
     }
     if (command === 'resume')
       return nativeRun(command, rest.slice(1).join(' '), config, cwd, onEvent, signal, rest[0]);
-    assert(['run', 'plan'].includes(command), `Unknown command ${command}. Run dhaara --help.`);
+    assert(['run', 'plan'].includes(command), `Unknown command ${command}. Run divyansharness --help.`);
     return nativeRun(command, rest.join(' '), config, cwd, onEvent, signal);
   });
   receipt(session, v.json);
@@ -294,7 +294,7 @@ async function interactive(config, cwd) {
       if (text === '/exit' || text === '/quit') break;
       if (text === '/help') {
         console.log(
-          '  /plan · /build · /new · /models · /diff · /status · /exit\n  Apply separately with: dhaara apply SESSION\n',
+          '  /plan · /build · /new · /models · /diff · /status · /exit\n  Apply separately with: divyansharness apply SESSION\n',
         );
         continue;
       }
@@ -342,7 +342,7 @@ async function interactive(config, cwd) {
         session = await nativeRun(mode, text, config, cwd, renderer(), active.signal, session?.id);
         receipt(session);
       } catch (e) {
-        console.log(`\n  ${safeText(e.message)}\n  Saved runs: dhaara sessions\n`);
+        console.log(`\n  ${safeText(e.message)}\n  Saved runs: divyansharness sessions\n`);
       } finally {
         active = undefined;
       }
@@ -354,7 +354,7 @@ async function interactive(config, cwd) {
 async function* prompts(rl) {
   while (!rl.closed) {
     try {
-      yield await rl.question('  dhaara › ');
+      yield await rl.question('  divyansharness › ');
     } catch {
       break;
     }

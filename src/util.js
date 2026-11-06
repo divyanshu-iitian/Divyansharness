@@ -3,7 +3,7 @@ import { spawn } from 'node:child_process';
 import { mkdir, writeFile, rename, rm } from 'node:fs/promises';
 import path from 'node:path';
 
-export const VERSION = '0.1.0';
+export const VERSION = '0.2.0';
 export const sha = (data) => createHash('sha256').update(data).digest('hex');
 export const uid = () => `${Date.now().toString(36)}-${randomBytes(5).toString('hex')}`;
 export const truncate = (s, n = 16000) =>

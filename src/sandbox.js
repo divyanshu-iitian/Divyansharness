@@ -27,7 +27,7 @@ export class DockerSandbox {
     const info = await exec('docker', ['info', '--format', '{{.OSType}}'], { timeout: 15000 });
     assert(
       info.code === 0 && info.stdout.trim() === 'linux',
-      'Docker Linux engine is unavailable. Start Docker Desktop (Linux containers) or Docker Engine, then run dhaara doctor. No host-shell fallback is used.',
+      'Docker Linux engine is unavailable. Start Docker Desktop (Linux containers) or Docker Engine, then run divyansharness doctor. No host-shell fallback is used.',
     );
     const image = await exec('docker', ['image', 'inspect', this.image, '--format', '{{.Id}}'], {
       timeout: 15000,
@@ -43,7 +43,7 @@ export class DockerSandbox {
   args(name, command, { readOnly = false, environment = {} } = {}) {
     assert(
       !this.workspace.includes(','),
-      'Docker workspace paths cannot contain commas. Set DHAARA_HOME to a path without commas.',
+      'Docker workspace paths cannot contain commas. Set DIVYANSHARNESS_HOME to a path without commas.',
     );
     const user = typeof process.getuid === 'function' ? process.getuid() : 1000;
     const args = [
@@ -54,7 +54,7 @@ export class DockerSandbox {
       '--name',
       name,
       '--label',
-      'dev.dhaara.managed=true',
+      'dev.divyansharness.managed=true',
       '--network',
       this.network ? 'bridge' : 'none',
       '--read-only',
@@ -103,7 +103,7 @@ export class DockerSandbox {
       'Command must be 1–16000 characters.',
     );
     if (!this.resolvedImage) await this.prepare();
-    const name = `dhaara-${uid()}`;
+    const name = `divyansharness-${uid()}`;
     const start = Date.now();
     try {
       const result = await exec('docker', this.args(name, command, { readOnly, environment }), {

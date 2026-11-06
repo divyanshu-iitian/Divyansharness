@@ -5,7 +5,7 @@ body:
     id: environment
     attributes:
       label: Environment
-      description: OS, Node version, Dhaara version, Docker version, provider/model. Never include API keys.
+      description: OS, Node version, Divyansharness version, Docker version, provider/model. Never include API keys.
     validations:
       required: true
   - type: textarea

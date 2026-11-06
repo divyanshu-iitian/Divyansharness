@@ -7,20 +7,20 @@ import { DockerSandbox } from '../../src/sandbox.js';
 import { exec } from '../../src/util.js';
 import { demo } from '../../src/demo.js';
 
-const root = await mkdtemp(path.join(os.tmpdir(), 'dhaara-sandbox-test-'));
-process.env.DHAARA_HOME = path.join(root, 'home');
+const root = await mkdtemp(path.join(os.tmpdir(), 'divyansharness-sandbox-test-'));
+process.env.DIVYANSHARNESS_HOME = path.join(root, 'home');
 test.after(() => rm(root, { recursive: true, force: true }));
 test('real Docker: stage writable, root readonly, host env absent, network disabled', async () => {
   const stage = await mkdtemp(path.join(root, 'stage-'));
   const s = new DockerSandbox(stage);
   await s.prepare();
-  process.env.DHAARA_TEST_SECRET = 'must-not-reach-container';
-  const script = `node -e 'const fs=require("fs"); fs.writeFileSync("proof","yes"); if(process.env.DHAARA_TEST_SECRET)process.exit(2); try {fs.writeFileSync("/escape","x");process.exit(3)} catch(e) {if(e.code!=="EROFS"&&e.code!=="EACCES")throw e;} const nets=require("os").networkInterfaces();if(Object.keys(nets).some(k=>k!=="lo"))process.exit(4);console.log("isolated")'`;
+  process.env.DIVYANSHARNESS_TEST_SECRET = 'must-not-reach-container';
+  const script = `node -e 'const fs=require("fs"); fs.writeFileSync("proof","yes"); if(process.env.DIVYANSHARNESS_TEST_SECRET)process.exit(2); try {fs.writeFileSync("/escape","x");process.exit(3)} catch(e) {if(e.code!=="EROFS"&&e.code!=="EACCES")throw e;} const nets=require("os").networkInterfaces();if(Object.keys(nets).some(k=>k!=="lo"))process.exit(4);console.log("isolated")'`;
   const r = await s.run(script);
   assert.equal(r.code, 0, r.stderr);
   assert.match(r.stdout, /isolated/);
   assert.equal(await readFile(path.join(stage, 'proof'), 'utf8'), 'yes');
-  delete process.env.DHAARA_TEST_SECRET;
+  delete process.env.DIVYANSHARNESS_TEST_SECRET;
 });
 test('real Docker: plan mount cannot write to stage', async () => {
   const stage = await mkdtemp(path.join(root, 'plan-'));
@@ -38,7 +38,7 @@ test('real Docker: timeout kills container, not just the CLI client', async () =
   const ps = await exec('docker', [
     'ps',
     '--filter',
-    'label=dev.dhaara.managed=true',
+    'label=dev.divyansharness.managed=true',
     '--format',
     '{{.Names}}',
   ]);
@@ -58,7 +58,7 @@ test('real Docker: abort reaps the container', async () => {
   const ps = await exec('docker', [
     'ps',
     '--filter',
-    'label=dev.dhaara.managed=true',
+    'label=dev.divyansharness.managed=true',
     '--format',
     '{{.Names}}',
   ]);

@@ -1,14 +1,14 @@
-# Using Dhaara
+# Using Divyansharness
 
 ## Requirements and storage
 
 Use Node 22/24 LTS and a local Linux Docker engine. The host CLI runs on Windows,
-macOS and Linux. `dhaara doctor` checks engine and default image; `sandbox setup`
+macOS and Linux. `divyansharness doctor` checks engine and default image; `sandbox setup`
 explicitly downloads it. Tasks never silently pull images or fall back to a host shell.
 
 Install directly from the GitHub release tarball; npm registry publication is not
-assumed. `npm uninstall -g @divyanshu-iitian/dhaara` removes the CLI, retaining sessions.
-Sessions live in `~/.dhaara/sessions/ID/`. Set `DHAARA_HOME` to change that directory.
+assumed. `npm uninstall -g @divyanshu-iitian/divyansharness` removes the CLI, retaining sessions.
+Sessions live in `~/.divyansharness/sessions/ID/`. Set `DIVYANSHARNESS_HOME` to change that directory.
 Windows paths may contain spaces but not commas (Docker mount syntax restriction).
 
 Each session contains `session.json`, `events.jsonl`, `workspace/` and `baseline/`.
@@ -18,7 +18,7 @@ not encrypted and can contain sensitive source or transcripts.
 
 ## Exclusions
 
-`.gitignore` is not interpreted. Add `.dhaaraignore` at the source root:
+`.gitignore` is not interpreted. Add `.divyansharnessignore` at the source root:
 
 ```text
 # Simple path patterns, not full gitignore syntax
@@ -41,7 +41,7 @@ provider. The default `node:22-alpine` image contains Node/npm, not your depende
 `node_modules` is excluded from source snapshots. Explicitly enable downloads:
 
 ```sh
-dhaara run "Install with npm ci, then fix the parser" --model YOUR_MODEL --network --verify "npm test"
+divyansharness run "Install with npm ci, then fix the parser" --model YOUR_MODEL --network --verify "npm test"
 ```
 
 This grants network access to the **whole container**, not only npm. For offline
@@ -52,7 +52,7 @@ Another runtime:
 
 ```sh
 docker pull python:3.12-alpine
-dhaara run "Fix the unit tests" --model YOUR_MODEL --image python:3.12-alpine --verify "python -m unittest"
+divyansharness run "Fix the unit tests" --model YOUR_MODEL --image python:3.12-alpine --verify "python -m unittest"
 ```
 
 Images must support `sh -lc`, the host UID (1000 on Windows), a readonly root,
@@ -64,7 +64,7 @@ are fixed. Bridge mode uses 1 GiB RAM and the pinned official CLI image.
 
 ## Verification, apply and recovery
 
-Repeat `--verify` for multiple checks. Otherwise Dhaara discovers a package test
+Repeat `--verify` for multiple checks. Otherwise Divyansharness discovers a package test
 script or JavaScript `.test` files. No check produces `needs-review`, not `verified`.
 `--require-verification` refuses completion without a check.
 
@@ -80,20 +80,20 @@ that its fixture tests did not change.
 
 | Symptom | Action |
 |---|---|
-| Docker unavailable | Start the Linux engine; run `dhaara doctor` |
-| Missing image | `dhaara sandbox setup`, or explicitly pull/build your custom image |
+| Docker unavailable | Start the Linux engine; run `divyansharness doctor` |
+| Missing image | `divyansharness sandbox setup`, or explicitly pull/build your custom image |
 | HTTP 429 | Respect limits; choose another currently free model or a local model |
 | `STALE_EDIT` | Reread the file and use its current hash |
 | `stalled` | Three unchanged failed submissions; inspect checks and resume with a stronger model or specific repair |
 | `budget-exhausted` | Progress saved; resume with an appropriate budget |
 | Ollama out of memory | Free resources you control or use a smaller model; model weights are separate from harness overhead |
-| No verified result | Inspect `dhaara show SESSION`, configure checks and verify again |
+| No verified result | Inspect `divyansharness show SESSION`, configure checks and verify again |
 | Bridge native resume error | Review/apply the bridge session, or start a new bridge run |
 
 Native recovery does not automatically replay interrupted actions. It tells the
 model side effects may have happened, so it can inspect before retrying. Find saved
-runs with `dhaara sessions`. A hard host crash may leave a container running;
-see [SECURITY.md](../SECURITY.md) for identifying only Dhaara-owned containers.
+runs with `divyansharness sessions`. A hard host crash may leave a container running;
+see [SECURITY.md](../SECURITY.md) for identifying only Divyansharness-owned containers.
 
 ## Budgets and providers
 
@@ -104,7 +104,7 @@ cross the budget before its usage is known. This is not a financial spending cap
 `usage.cost` sums reported costs; absent reporting does not prove a compatible API
 is free. Use provider-side limits when selecting a paid compatible endpoint.
 
-The OpenCode bridge uses the official client's loop and token behavior; Dhaara
+The OpenCode bridge uses the official client's loop and token behavior; Divyansharness
 enforces the outer timeout and container resources. Provider terms and project-level
 OpenCode configuration still apply. An optional `OPENCODE_API_KEY` is visible to
 tools inside that network-enabled container. Native provider keys stay on the host.

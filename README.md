@@ -1,4 +1,4 @@
-<p align="center"><img src="assets/hero.svg" alt="Dhaara — Think freely. Change deliberately. A terminal coding harness with local isolation and verification before apply." width="100%"></p>
+<p align="center"><img src="assets/hero.svg" alt="Divyansharness — Think freely. Change deliberately. A terminal coding harness with local isolation and verification before apply." width="100%"></p>
 
 <p align="center">
   <a href="https://github.com/divyanshu-iitian/Divyansharness/actions/workflows/ci.yml"><img src="https://github.com/divyanshu-iitian/Divyansharness/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
@@ -8,11 +8,11 @@
   <a href="https://github.com/divyanshu-iitian/Divyansharness/releases"><img src="https://img.shields.io/github/v/release/divyanshu-iitian/Divyansharness?include_prereleases" alt="Latest release"></a>
 </p>
 
-**Dhaara is a small, open-source terminal coding harness.** Give it a task. It works
+**Divyansharness is a small, open-source terminal coding harness.** Give it a task. It works
 in a staged copy, runs commands in local Docker, checks its work, and leaves you a
 diff to apply. The native runtime has **zero npm dependencies**.
 
-**Experimental v0.1.** Model quality still matters. This is not a benchmark-proven
+**Experimental v0.2.** Model quality still matters. This is not a benchmark-proven
 replacement for OpenCode, DeepSeek Harness, or your code review.
 
 ```text
@@ -25,7 +25,7 @@ your task → isolated workspace → tools → verification → diff → you app
 ## Why another harness?
 
 A model predicts what to do. A **harness** supplies the loop around it: instructions,
-tools, context, execution, budgets, state and a definition of “done.” Dhaara keeps
+tools, context, execution, budgets, state and a definition of “done.” Divyansharness keeps
 that machinery small enough to read and explicit enough to inspect.
 
 - **Your working tree is yours.** Bounded snapshots, reviewable diffs, and apply that
@@ -48,10 +48,10 @@ Install [Node.js 22 or 24 LTS](https://nodejs.org/) and a running
 Windows/macOS users can use Docker Desktop. No cloud sandbox subscription needed.
 
 ```sh
-npm install -g https://github.com/divyanshu-iitian/Divyansharness/releases/download/v0.1.0/divyanshu-iitian-dhaara-0.1.0.tgz
-dhaara sandbox setup
-dhaara doctor
-dhaara demo
+npm install -g https://github.com/divyanshu-iitian/Divyansharness/releases/download/v0.2.0/divyanshu-iitian-divyansharness-0.2.0.tgz
+divyansharness sandbox setup
+divyansharness doctor
+divyansharness demo
 ```
 
 `demo` needs **no model or API key**. It uses a scripted tool sequence against real
@@ -70,21 +70,21 @@ npm install -g .
 
 | Route | What you need | Agent loop | Cost boundary |
 |---|---|---|---|
-| **Ollama** | Local model with tool calling | Dhaara on your computer | No inference API bill; hardware costs separate |
-| **OpenRouter** | Your `OPENROUTER_API_KEY` | Dhaara on your computer | Live zero-price `:free` tool models; no paid fallback |
+| **Ollama** | Local model with tool calling | Divyansharness on your computer | No inference API bill; hardware costs separate |
+| **OpenRouter** | Your `OPENROUTER_API_KEY` | Divyansharness on your computer | Live zero-price `:free` tool models; no paid fallback |
 | **OpenCode bridge** | Optional bridge image; network | Official OpenCode CLI in Docker | Currently free model selected; provider limits apply |
-| **Compatible API** | URL, model, optional `DHAARA_API_KEY` | Dhaara on your computer | Provider-specific; may cost money |
+| **Compatible API** | URL, model, optional `DIVYANSHARNESS_API_KEY` | Divyansharness on your computer | Provider-specific; may cost money |
 
 ### OpenCode free models
 
-OpenCode currently restricts free-tier chat to its own client. Dhaara integrates
+OpenCode currently restricts free-tier chat to its own client. Divyansharness integrates
 the **official CLI** in a staged container; it does not impersonate that client.
 See [OpenCode's inference policy](https://opencode.ai/docs/console/api/inference/).
 
 ```sh
-dhaara sandbox setup --bridge
-dhaara models --provider opencode
-dhaara bridge "Fix the failing tests" --network --model big-pickle --verify "npm test"
+divyansharness sandbox setup --bridge
+divyansharness models --provider opencode
+divyansharness bridge "Fix the failing tests" --network --model big-pickle --verify "npm test"
 ```
 
 Choose from the live list; names and availability change. `big-pickle` passed our
@@ -92,7 +92,7 @@ tiny-task smoke check. Set your own `OPENCODE_API_KEY` if your account requires 
 Free access is not unlimited or guaranteed.
 
 The bridge grants outbound access to the whole container. OpenCode owns its loop;
-Dhaara supplies staging, container limits, independent **offline** verification
+Divyansharness supplies staging, container limits, independent **offline** verification
 and conflict-checked apply. It uses a whole-run timeout, not native turn/token
 budgets. Native `resume` does not resume OpenCode sessions.
 
@@ -102,8 +102,8 @@ Start [Ollama](https://docs.ollama.com/quickstart), install a tool-capable local
 that fits your hardware, then use its exact name:
 
 ```sh
-dhaara models --provider ollama
-dhaara run "Fix the failing tests" --provider ollama --model YOUR_LOCAL_MODEL --verify "npm test"
+divyansharness models --provider ollama
+divyansharness run "Fix the failing tests" --provider ollama --model YOUR_LOCAL_MODEL --verify "npm test"
 ```
 
 Ollama is the default provider at `http://localhost:11434/v1`. Select a model
@@ -117,8 +117,8 @@ Set `OPENROUTER_API_KEY` in your shell: `export OPENROUTER_API_KEY=...` on bash/
 or `$env:OPENROUTER_API_KEY='...'` in PowerShell. Then:
 
 ```sh
-dhaara models --provider openrouter
-dhaara run "Fix the failing tests" --provider openrouter --model MODEL_FROM_THE_LIST --verify "npm test"
+divyansharness models --provider openrouter
+divyansharness run "Fix the failing tests" --provider openrouter --model MODEL_FROM_THE_LIST --verify "npm test"
 ```
 
 Discovery requires zero input/output prices and tool support. Requests also set
@@ -129,34 +129,34 @@ route; discovery and protocol behavior are tested.
 ### Other providers
 
 ```sh
-dhaara run "Explain this module" --provider compatible --base-url https://YOUR_PROVIDER/v1 --model YOUR_MODEL
+divyansharness run "Explain this module" --provider compatible --base-url https://YOUR_PROVIDER/v1 --model YOUR_MODEL
 ```
 
-Set `DHAARA_API_KEY` if needed. Supports streaming Chat Completions with tools;
+Set `DIVYANSHARNESS_API_KEY` if needed. Supports streaming Chat Completions with tools;
 native Responses, Anthropic and Gemini protocols are not yet implemented.
 
 ## Work, review, apply
 
 ```sh
-dhaara plan "Find the cause of the failing tests" --model YOUR_LOCAL_MODEL
-dhaara run "Repair the failing parser" --model YOUR_LOCAL_MODEL --verify "npm test"
-dhaara diff SESSION_ID
-dhaara show SESSION_ID
-dhaara apply SESSION_ID
+divyansharness plan "Find the cause of the failing tests" --model YOUR_LOCAL_MODEL
+divyansharness run "Repair the failing parser" --model YOUR_LOCAL_MODEL --verify "npm test"
+divyansharness diff SESSION_ID
+divyansharness show SESSION_ID
+divyansharness apply SESSION_ID
 ```
 
 The run prints its session ID. `apply` requires a verified, unchanged staged tree
 and checks original-file conflicts. Without a verifier, completion is `needs-review`.
-Run `dhaara verify SESSION_ID --verify "command"`, or use the explicit
+Run `divyansharness verify SESSION_ID --verify "command"`, or use the explicit
 `--allow-unverified` apply override after your own review.
 
 ```sh
-dhaara resume SESSION_ID "Continue from the failing check" --model YOUR_LOCAL_MODEL
-dhaara sessions
-dhaara run "Fix the parser" --max-turns 12 --max-tokens 60000 --timeout 300 --json
+divyansharness resume SESSION_ID "Continue from the failing check" --model YOUR_LOCAL_MODEL
+divyansharness sessions
+divyansharness run "Fix the parser" --max-turns 12 --max-tokens 60000 --timeout 300 --json
 ```
 
-Run `dhaara --model YOUR_LOCAL_MODEL` for the terminal conversation. Commands:
+Run `divyansharness --model YOUR_LOCAL_MODEL` for the terminal conversation. Commands:
 `/plan`, `/build`, `/new`, `/models`, `/diff`, `/status`, `/help`, `/exit`.
 `Ctrl+C` cancels active work. `--json` emits newline-delimited events for scripting.
 
@@ -173,7 +173,7 @@ bridge gets 1 GiB RAM. The default Node Alpine image does not include Python or 
 project's dependencies. Prepare a custom `--image` when needed.
 
 Snapshots omit `.git`, dependencies, known secret paths and symlinks. Limits:
-5,000 files, 64 MiB total, 1 MiB per file. Add `.dhaaraignore` exclusions for larger
+5,000 files, 64 MiB total, 1 MiB per file. Add `.divyansharnessignore` exclusions for larger
 repos. See [usage and troubleshooting](docs/USAGE.md).
 
 ## Evidence, not leaderboard promises
@@ -190,7 +190,7 @@ repos. See [usage and troubleshooting](docs/USAGE.md).
 One tiny task is not SWE-bench or Terminal-Bench. No superiority over OpenCode or
 DeepSeek Harness has been established. The differentiator is a readable small
 runtime combining staged changes, explicit free routes and verification receipts.
-Mature harnesses offer broader integrations; v0.1 does not include MCP, LSP,
+Mature harnesses offer broader integrations; v0.2 does not include MCP, LSP,
 multi-agent orchestration or a full-screen TUI.
 
 ```sh

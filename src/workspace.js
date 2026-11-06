@@ -16,8 +16,8 @@ import { assert, sha, uid, truncate } from './util.js';
 
 const EXCLUDED = new Set([
   '.git',
-  '.dhaara',
-  '.dhaaraignore',
+  '.divyansharness',
+  '.divyansharnessignore',
   'node_modules',
   '.venv',
   'venv',
@@ -53,8 +53,8 @@ function glob(pattern) {
 }
 export async function rules(root) {
   try {
-    const file = path.join(root, '.dhaaraignore');
-    assert(!(await lstat(file)).isSymbolicLink(), '.dhaaraignore cannot be a symlink.');
+    const file = path.join(root, '.divyansharnessignore');
+    assert(!(await lstat(file)).isSymbolicLink(), '.divyansharnessignore cannot be a symlink.');
     return (await readFile(file, 'utf8'))
       .split(/\r?\n/)
       .map((s) => s.trim())
@@ -124,11 +124,11 @@ export async function inventory(
       }
       if (!item.isFile()) continue;
       const stat = await lstat(full);
-      assert(stat.size <= MAX_FILE, `${rel} exceeds 1 MiB. Exclude it in .dhaaraignore.`);
+      assert(stat.size <= MAX_FILE, `${rel} exceeds 1 MiB. Exclude it in .divyansharnessignore.`);
       bytes += stat.size;
       assert(
         bytes <= maxBytes && Object.keys(files).length < maxFiles,
-        'Snapshot exceeds 64 MiB / 5000 files. Add exclusions to .dhaaraignore.',
+        'Snapshot exceeds 64 MiB / 5000 files. Add exclusions to .divyansharnessignore.',
       );
       const data = await readFile(full);
       files[rel] = { hash: sha(data), bytes: data.length, mode: stat.mode & 0o777 };
@@ -241,7 +241,7 @@ export async function editFile(root, args) {
     'Content must be text under 1 MiB.',
   );
   await mkdir(path.dirname(full), { recursive: true });
-  const tmp = `${full}.dhaara-${uid()}`;
+  const tmp = `${full}.divyansharness-${uid()}`;
   await writeFile(tmp, after, { flag: 'wx' });
   await rename(tmp, full);
   return { path: relative, hash: sha(after), bytes: Buffer.byteLength(after) };
@@ -280,7 +280,7 @@ export async function diff(session) {
       toA = Math.min(a.length, lastA + 3),
       toB = Math.min(b.length, lastB + 3);
     result.push(
-      `diff --dhaara a/${change.path} b/${change.path}\n--- ${change.before ? 'a/' + change.path : '/dev/null'}\n+++ ${change.after ? 'b/' + change.path : '/dev/null'}\n@@ -${from + 1},${toA - from} +${from + 1},${toB - from} @@\n` +
+      `diff --divyansharness a/${change.path} b/${change.path}\n--- ${change.before ? 'a/' + change.path : '/dev/null'}\n+++ ${change.after ? 'b/' + change.path : '/dev/null'}\n@@ -${from + 1},${toA - from} +${from + 1},${toB - from} @@\n` +
         a
           .slice(from, first)
           .map((s) => ' ' + s)
@@ -346,7 +346,7 @@ export async function applyChanges(session, { allowUnverified = false } = {}) {
         await h.close();
       }
     } else {
-      const tmp = `${item.target}.dhaara-${uid()}`;
+      const tmp = `${item.target}.divyansharness-${uid()}`;
       await writeFile(tmp, item.data, { flag: 'wx', mode: session.files[item.path]?.mode });
       await rename(tmp, item.target);
     }

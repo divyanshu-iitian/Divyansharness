@@ -9,8 +9,8 @@ import { executeTool, parseTool } from '../src/tools.js';
 import { DockerSandbox } from '../src/sandbox.js';
 import { safeText } from '../src/util.js';
 
-const base = await mkdtemp(path.join(os.tmpdir(), 'dhaara-agent-test-'));
-process.env.DHAARA_HOME = path.join(base, 'home');
+const base = await mkdtemp(path.join(os.tmpdir(), 'divyansharness-agent-test-'));
+process.env.DIVYANSHARNESS_HOME = path.join(base, 'home');
 test.after(() => rm(base, { recursive: true, force: true }));
 async function fixture() {
   const cwd = await mkdtemp(path.join(base, 'project-'));

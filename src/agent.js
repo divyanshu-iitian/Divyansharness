@@ -3,7 +3,7 @@ import { save, event, lock } from './session.js';
 import { assert, sha, truncate } from './util.js';
 import { readText, fingerprint } from './workspace.js';
 
-export const SYSTEM = `You are Dhaara, a careful terminal coding agent. Complete the user's task in the staged workspace.
+export const SYSTEM = `You are Divyansharness, a careful terminal coding agent. Complete the user's task in the staged workspace.
 Read before editing. Use current whole-file hashes; stale edits must be re-read. Prefer small changes. Do not alter tests just to make checks pass.
 To change code, invoke edit_file. Describing a change in prose or a code block does not change files. File line numbers start at 1.
 Use checkpoint to preserve decisions and unfinished work. Run relevant checks, inspect their output, and fix failures.
@@ -255,7 +255,7 @@ export async function runAgent(
     await save(session);
     await event(session, 'error', { message: e.message });
     throw new Error(
-      `${e.message}\nSession saved: ${session.id}. Inspect with dhaara show ${session.id}.`,
+      `${e.message}\nSession saved: ${session.id}. Inspect with divyansharness show ${session.id}.`,
       { cause: e },
     );
   } finally {
