@@ -58,6 +58,16 @@ test('workspace rejects traversal, absolute paths, NTFS streams and device names
   ])
     await assert.rejects(safePath(s.stage, bad));
 });
+test('legacy and current ignore rules both protect files after the rename', async (t) => {
+  const s = await fixture(t, {
+    '.dhaaraignore': 'private/\n',
+    '.divyansharnessignore': 'generated/\n',
+    'private/note.txt': 'private',
+    'generated/build.js': 'generated',
+    'public.js': 'ok',
+  });
+  assert.deepEqual(Object.keys(s.files), ['public.js']);
+});
 test('range edit uses a whole-file hash and leaves original untouched', async (t) => {
   const s = await fixture(t);
   const r = await readAnchored(s.stage, 'a.js');

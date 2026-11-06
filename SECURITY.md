@@ -22,6 +22,15 @@ device names and alternate streams. Snapshot and apply omit known secret filenam
 not a secret scanner: secrets embedded in ordinary source files are still source.
 Inspect what you give to an agent, especially before using a remote provider.
 
+New conversations start without copying project files. Native chat has no tool
+access. `/plan` or `/build` attaches the project. The official OpenCode bridge
+uses its own plan agent in chat/plan mode, with a readonly project mount; after
+attachment it can still read staged files and earlier history. The no-write boundary
+is enforced by Docker, not merely by a prompt. Its synthetic home is a dedicated
+`bridge-state` mount containing only that session's client state. This state is
+writable and unencrypted. It does not mount your real home or existing OpenCode auth.
+Selecting OpenCode in the picker explicitly selects a network-enabled backend.
+
 ## Limits
 
 - Docker shares its host's Linux kernel (or Docker Desktop VM kernel). It is not

@@ -1,5 +1,32 @@
 # Using Divyansharness
 
+## Start a terminal conversation
+
+Run `divyansharness` after installing, or `npm start` from the repository. First
+launch asks for a provider/model. Preferences save to `~/.divyansharness/config.json`;
+API keys are never entered into that picker or saved there. `/provider` starts a
+fresh conversation with another backend; `/model` keeps the current conversation.
+The OpenCode choice enables container networking and prepares its image on first use.
+
+Native `/chat` has no tools and needs no Docker. New conversations do not snapshot
+the repository. `/plan` or `/build` explicitly attaches it; plan is readonly, build
+permits staged coding. The OpenCode bridge uses its official plan agent and a
+readonly mount outside build mode. After project attachment, its client can still
+read that staged source; switching back to chat does not erase earlier context.
+
+`/multiline` collects lines until `/send`. `/cancel` discards that block. A normal
+Enter sends a message; Shift+Enter/full-screen editing is not implemented. Inputs
+typed while a model works are queued for following turns. `/status`, `/diff`,
+`/verify COMMAND` and `/apply` are available without leaving the conversation.
+`/resume` selects a saved session for the current project; `/resume ID` opens an ID.
+`/setup` prepares the current provider's image; `divyansharness setup` runs setup alone.
+
+Uninstall: `npm uninstall -g @divyanshu-iitian/divyansharness`. For the former package,
+use `npm uninstall -g @divyanshu-iitian/dhaara`. Sessions/images are retained.
+`DHAARA_HOME` and `DHAARA_API_KEY` remain legacy fallbacks; `.dhaaraignore` rules are
+still honored. An old session ID can be loaded from `~/.dhaara`; set
+`DIVYANSHARNESS_HOME` to that directory to list the old store explicitly.
+
 ## Requirements and storage
 
 Use Node 22/24 LTS and a local Linux Docker engine. The host CLI runs on Windows,
@@ -13,7 +40,9 @@ Windows paths may contain spaces but not commas (Docker mount syntax restriction
 
 Each session contains `session.json`, `events.jsonl`, `workspace/` and `baseline/`.
 The baseline preserves original snapshotted content. Native history is retained;
-bridge logs retain a bounded output tail and event summary. These local files are
+bridge transcripts include readable turns and a bounded output tail. The dedicated
+`bridge-state/` directory persists the official client's database for continuation.
+This is not your real host home or existing OpenCode configuration. These local files are
 not encrypted and can contain sensitive source or transcripts.
 
 ## Exclusions
@@ -88,7 +117,7 @@ that its fixture tests did not change.
 | `budget-exhausted` | Progress saved; resume with an appropriate budget |
 | Ollama out of memory | Free resources you control or use a smaller model; model weights are separate from harness overhead |
 | No verified result | Inspect `divyansharness show SESSION`, configure checks and verify again |
-| Bridge native resume error | Review/apply the bridge session, or start a new bridge run |
+| Old v0.1 bridge resume | Old ephemeral client state was not retained; start a new conversation. v0.2 bridge sessions support resume |
 
 Native recovery does not automatically replay interrupted actions. It tells the
 model side effects may have happened, so it can inspect before retrying. Find saved
@@ -108,4 +137,4 @@ The OpenCode bridge uses the official client's loop and token behavior; Divyansh
 enforces the outer timeout and container resources. Provider terms and project-level
 OpenCode configuration still apply. An optional `OPENCODE_API_KEY` is visible to
 tools inside that network-enabled container. Native provider keys stay on the host.
-Do not use native `resume` for an OpenCode bridge session.
+`resume SESSION` dispatches to the saved backend, including persistent v0.2 bridge sessions.

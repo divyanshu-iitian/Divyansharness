@@ -21,6 +21,7 @@ export async function runTurn({
     'Enter a message of 1–32000 characters.',
   );
   assert(['chat', 'plan', 'build'].includes(mode), 'Unknown mode.');
+  assert(session?.status !== 'applied', 'This session was applied. Start a new conversation.');
   const merged = {
     ...session?.options,
     ...Object.fromEntries(Object.entries(config).filter(([, v]) => v !== undefined)),

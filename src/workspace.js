@@ -54,18 +54,22 @@ function glob(pattern) {
   );
 }
 export async function rules(root) {
-  try {
-    const file = path.join(root, '.divyansharnessignore');
-    assert(!(await lstat(file)).isSymbolicLink(), '.divyansharnessignore cannot be a symlink.');
-    return (await readFile(file, 'utf8'))
-      .split(/\r?\n/)
-      .map((s) => s.trim())
-      .filter((s) => s && !s.startsWith('#'))
-      .map((s) => glob(s.replace(/^\//, '').replace(/\/$/, '')));
-  } catch (e) {
-    if (e.code === 'ENOENT') return [];
-    throw e;
-  }
+  const patterns = [];
+  for (const name of ['.divyansharnessignore', '.dhaaraignore'])
+    try {
+      const file = path.join(root, name);
+      assert(!(await lstat(file)).isSymbolicLink(), `${name} cannot be a symlink.`);
+      patterns.push(
+        ...(await readFile(file, 'utf8'))
+          .split(/\r?\n/)
+          .map((s) => s.trim())
+          .filter((s) => s && !s.startsWith('#'))
+          .map((s) => glob(s.replace(/^\//, '').replace(/\/$/, ''))),
+      );
+    } catch (e) {
+      if (e.code !== 'ENOENT') throw e;
+    }
+  return patterns;
 }
 /** Reject traversal, links, reserved names and non-portable paths on every platform. */
 export async function safePath(root, relative) {

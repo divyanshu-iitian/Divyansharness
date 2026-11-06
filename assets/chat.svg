@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="570" viewBox="0 0 1200 570" role="img" aria-labelledby="title desc">
+  <title id="title">Real Divyansharness terminal conversation</title><desc id="desc">A free OpenCode model remembers a marker across two turns, then fixes a bug in build mode and passes independent verification. Transcript excerpt, not a benchmark.</desc>
+  <rect width="1200" height="570" rx="16" fill="#101b24"/>
+  <path d="M0 57H1200" stroke="#233846"/>
+  <circle cx="28" cy="28" r="5" fill="#89ddca"/><circle cx="47" cy="28" r="5" fill="#576d76"/><circle cx="66" cy="28" r="5" fill="#576d76"/>
+  <g font-family="Consolas, monospace" font-size="20" fill="#dce7e9">
+    <text x="92" y="35" font-size="16" fill="#89ddca">Divyansharness · terminal chat · v0.2</text>
+    <text x="44" y="105" fill="#829aa5">opencode / big-pickle · CHAT</text>
+    <text x="44" y="152" fill="#89ddca">you [chat] &gt; Remember my release marker: violet-7429.</text>
+    <text x="44" y="188">assistant  &gt; Got it — release marker noted: violet-7429.</text>
+    <text x="44" y="242" fill="#89ddca">you [chat] &gt; What exact release marker did I tell you?</text>
+    <text x="44" y="278">assistant  &gt; violet-7429</text>
+    <text x="44" y="332" fill="#89ddca">you [chat] &gt; /build</text>
+    <text x="44" y="368">read → edit → shell node --test → independent verification</text>
+    <text x="44" y="414" fill="#89ddca">verified · duration.js: seconds * 100 → seconds * 1000</text>
+    <text x="44" y="450" fill="#829aa5">/diff to review · /apply when ready · original files unchanged</text>
+    <text x="44" y="526" font-size="15" fill="#829aa5">Actual free-model run, 7 Nov 2026 · transcript excerpt · one smoke task, not a ranking</text>
+  </g>
+</svg>

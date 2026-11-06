@@ -20,6 +20,8 @@ flowchart LR
 | Module | Responsibility |
 |---|---|
 | `cli.js`, `ui.js` | Terminal conversation, explicit commands, safe output, JSON events |
+| `interactive.js`, `terminal-input.js` | Model chooser, mode commands, queued input and in-chat review |
+| `chat.js`, `runner.js`, `settings.js` | Tool-free native conversation, backend dispatch, non-secret preferences |
 | `agent.js` | Bounded loop, context selection, action recovery, completion gating |
 | `providers.js` | Local/free catalog discovery, native SSE Chat Completions |
 | `tools.js` | Small tool schema set, strict argument checks, verifier ownership |
@@ -29,6 +31,18 @@ flowchart LR
 | `bridge.js` | Optional official OpenCode CLI inside a staged Docker workspace |
 
 ## Deliberate choices
+
+**Conversation before attachment.** A new chat session stores messages without
+copying project files. Native chat calls the provider without tools. An explicit
+plan/build transition snapshots the source into that session. The conversation is
+retained; coding uses the existing verified tool boundary. Native chat can work
+without Docker. This differs from the scripted demo, which is an optional engine test.
+
+**Two kinds of durable state.** Native history lives in session JSON. The official
+OpenCode backend retains its own database in a dedicated `bridge-state` directory
+bound to the container's synthetic home. It reuses the captured official session ID
+across disposable containers. Original host home/config are never mounted. Outside
+build mode the project mount is readonly; bridge state remains writable for history.
 
 **Copy first.** Reading the repository creates a bounded snapshot. The agent can
 experiment without changing the original. Dependency directories and known secret

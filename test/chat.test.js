@@ -6,7 +6,7 @@ import { createServer } from 'node:http';
 import { spawn } from 'node:child_process';
 import os from 'node:os';
 import path from 'node:path';
-import { createSession, loadSession, stageConversation } from '../src/session.js';
+import { createSession, loadSession, stageConversation, save } from '../src/session.js';
 import { runChat } from '../src/chat.js';
 import { writeSettings, readSettings } from '../src/settings.js';
 import { TerminalInput } from '../src/terminal-input.js';
@@ -67,6 +67,11 @@ test('chat mode refuses unsolicited tool execution', async () => {
   assert.deepEqual(await readdir(s.stage), []);
   assert.equal(s.status, 'failed');
 });
+test('an applied session stays applied when conversation resume is rejected',async()=>{
+  const s=await fixture();s.status='applied';await save(s);
+  await assert.rejects(runChat(s,{model:'unused'},{prompt:'continue'}),/new conversation/);
+  assert.equal((await loadSession(s.id)).status,'applied');
+});
 test('explicit promotion attaches source while retaining the conversation', async () => {
   const s = await fixture();
   s.messages = [{ role: 'user', content: 'Design it first' }];
@@ -106,7 +111,7 @@ test('terminal input preserves pasted lines and typeahead through asynchronous t
   assert.equal(await input.ask('> '), 'third');
   assert.equal(await input.ask('> '), null);
 });
-test('actual CLI chat handles two queued turns and resumes conversational context', async (t) => {
+test('actual CLI handles first-run provider selection, two queued turns and context', async (t) => {
   let requests = 0;
   const server = createServer(async (req, res) => {
     let body = '';
@@ -134,24 +139,11 @@ test('actual CLI chat handles two queued turns and resumes conversational contex
   });
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
   t.after(() => new Promise((r) => server.close(r)));
-  const child = spawn(
-    process.execPath,
-    [
-      'bin/divyansharness.js',
-      'chat',
-      '--provider',
-      'compatible',
-      '--model',
-      'test',
-      '--base-url',
-      `http://127.0.0.1:${server.address().port}/v1`,
-    ],
-    {
-      env: { ...process.env, DIVYANSHARNESS_HOME: path.join(root, 'cli-home') },
-      windowsHide: true,
-      stdio: ['pipe', 'pipe', 'pipe'],
-    },
-  );
+  const child = spawn(process.execPath, ['bin/divyansharness.js', 'chat'], {
+    env: { ...process.env, DIVYANSHARNESS_HOME: path.join(root, 'cli-home') },
+    windowsHide: true,
+    stdio: ['pipe', 'pipe', 'pipe'],
+  });
   let output = '',
     errors = '';
   child.stdout.on('data', (c) => (output += c));
@@ -160,9 +152,14 @@ test('actual CLI chat handles two queued turns and resumes conversational contex
     child.on('error', reject);
     child.on('close', resolve);
   });
-  child.stdin.end('Remember cobalt-7\nWhat marker did I give you?\n/status\n/exit\n');
+  child.stdin.end(
+    `4\nhttp://127.0.0.1:${server.address().port}/v1\ntest\nRemember cobalt-7\nWhat marker did I give you?\n/status\n/exit\n`,
+  );
   assert.equal(await exited, 0, errors);
   assert.equal(requests, 2);
   assert.match(output, /Your marker is cobalt-7/);
   assert.match(output, /Project: not attached/);
+  const settings = JSON.parse(await readFile(path.join(root, 'cli-home', 'config.json'), 'utf8'));
+  assert.equal(settings.provider, 'compatible');
+  assert.equal(settings.model, 'test');
 });

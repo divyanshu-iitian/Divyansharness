@@ -96,7 +96,7 @@ async function chooseProvider(input, current, write, discover) {
   await writeSettings(next);
   return { ...current, ...next, baseURL: next.baseURL };
 }
-export async function setupImage(config, write) {
+export async function setupImage(config, write, signal) {
   const bridge = config.provider === 'opencode';
   const dockerfile = fileURLToPath(new URL('../sandbox/Dockerfile.opencode', import.meta.url));
   const args = bridge
@@ -110,6 +110,7 @@ export async function setupImage(config, write) {
       ]
     : ['pull', config.image ?? DEFAULT_IMAGE];
   const result = await exec('docker', args, {
+    signal,
     timeout: 600000,
     onData: (text) => write(safeText(text)),
   });
@@ -140,6 +141,7 @@ export async function interactive(
     else input.close();
   };
   input.rl?.on('SIGINT', cancel);
+  process.on('SIGINT', cancel);
   banner();
   write(`  ${safeText(path.resolve(cwd))}\n  Chat first. /build to code. /help for commands.\n\n`);
   try {
@@ -154,8 +156,27 @@ export async function interactive(
     }
     if (config.provider === 'opencode') config.network = true;
     if (setupOnly) {
-      await setupImage(config, write);
+      active = new AbortController();
+      await setupImage(config, write, active.signal);
       return;
+    }
+    if (config.provider === 'opencode') {
+      active = new AbortController();
+      try {
+        const image = await exec('docker', ['image', 'inspect', config.image ?? BRIDGE_IMAGE], {
+          timeout: 15000,
+          signal: active.signal,
+        });
+        if (image.code !== 0) {
+          write('  Preparing the official OpenCode image for first use…\n');
+          await setupImage(config, write, active.signal);
+        }
+      } catch (e) {
+        if (active.signal.aborted) return;
+        write(`  ${safeText(e.message)}\n  Start Docker, then /setup; or choose /provider.\n`);
+      } finally {
+        active = undefined;
+      }
     }
     write(
       `\n  ${safeText(config.provider)} / ${safeText(config.model)} · CHAT\n  ${config.provider === 'opencode' ? 'Docker + network enabled' : 'Project tools inactive in chat'}\n\n`,
@@ -234,6 +255,7 @@ export async function interactive(
             session = await loadSession(id);
           }
           assert(session.status !== 'applied', 'This session was applied. Use /new.');
+          cwd = session.original;
           config = {
             ...session.options,
             provider:
@@ -242,11 +264,12 @@ export async function interactive(
                 : session.options.provider,
           };
           mode = session.options.mode ?? (session.options.plan ? 'plan' : 'build');
-          write(`  Resumed ${session.id} · ${mode}\n`);
+          write(`  Resumed ${session.id} · ${mode}\n  ${safeText(cwd)}\n`);
           continue;
         }
         if (command === '/setup') {
-          await setupImage(config, write);
+          active = new AbortController();
+          await setupImage(config, write, active.signal);
           continue;
         }
         if (command === '/diff') {
@@ -328,6 +351,7 @@ export async function interactive(
       }
     }
   } finally {
+    process.removeListener('SIGINT', cancel);
     input.close();
   }
 }

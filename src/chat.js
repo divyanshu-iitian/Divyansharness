@@ -8,6 +8,7 @@ export async function runChat(
   provider,
   { prompt, signal, onEvent = () => {}, durationMs = 600000, maxTokens = 160000 } = {},
 ) {
+  assert(session.status !== 'applied', 'Start a new conversation after applying changes.');
   const release = await lock(session);
   const combined = signal
     ? AbortSignal.any([signal, AbortSignal.timeout(durationMs)])

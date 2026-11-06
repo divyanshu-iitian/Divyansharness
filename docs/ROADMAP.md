@@ -1,5 +1,16 @@
 # Roadmap
 
+## v0.2 — Terminal chat people can discover
+
+- [x] Restore Divyansharness package and executable name
+- [x] Provider/model chooser and non-secret saved preferences
+- [x] Native chat without tools or project snapshots
+- [x] Explicit chat/plan/build transitions, retaining context
+- [x] Persistent official OpenCode conversations across process restarts
+- [x] Queued input, multiline blocks and in-chat review/verify/apply
+- [x] First-run CLI tests and real free-model conversation smoke
+- [ ] Full-screen editor, richer keyboard support and session branching
+
 ## v0.1 — A useful, inspectable core
 
 - [x] Native terminal and JSON CLI

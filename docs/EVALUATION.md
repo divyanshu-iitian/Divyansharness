@@ -3,7 +3,30 @@
 Date: **7 November 2026, Asia/Kolkata** (raw timestamps are UTC).
 These are engineering checks and smoke runs, not a comparative leaderboard.
 
-## Live tiny-task smoke
+## v0.2 terminal chat, build and restart
+
+The actual terminal CLI ran two free-model chat turns, remembered an arbitrary
+marker, switched to /build in that conversation, fixed the fixture and passed an
+independent `node --test`. A separate CLI process then used /resume and remembered
+the marker again. Original implementation/test files remained unchanged; only the
+expected staged implementation changed. [Machine-readable evidence](evaluations/chat-0.2-2026-11-07.json).
+
+Backend: official OpenCode 2.2.5 / big-pickle. Four model-facing user turns, reported
+1,369 input and 336 output tokens, reported cost $0. Provider token accounting may
+exclude cached tokens; this is not a cross-harness efficiency comparison.
+
+The native CLI's first-run picker, two queued chat turns, retained history and
+no-tool/no-project boundary are tested against a local HTTP protocol fixture.
+That fixture validates wiring, not language-model ability. Real Docker additionally
+tests persistent bridge state alongside a readonly project mount.
+
+v0.2 local overhead: seven version launches, **82.9 ms median**, **49.2 MB RSS** after
+CLI import, **102,644 bytes** of runtime source, zero runtime npm dependencies.
+[Raw report](evaluations/overhead-0.2-2026-11-07.json). Same Windows/Node 25 machine;
+Docker and model memory are additional. Different machine load prevents inferring
+a speed improvement over the older measurements below.
+
+## v0.1 live tiny-task smoke (historical)
 
 The task fixes a multiplier in `examples/tiny-bug/duration.js`. The evaluator requires
 a verified result, unchanged fixture tests, unchanged original source, exactly the

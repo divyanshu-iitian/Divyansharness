@@ -153,6 +153,29 @@ Validation: 39 unit/protocol/CLI tests passed, 1 Windows symlink test skipped.
 New tests cover chat without tools/files, context retention, explicit project
 attachment, secret-free preferences, queued input and the actual two-turn CLI.
 
+## 11 — First-run usability, continuity evidence and v0.2 release gate
+
+Added first-use bridge image preparation, kept code-edit tools out of native plan
+mode, preserved applied-session status on rejected resume, and honored both old
+and new ignore files. The actual CLI test now drives the first-run provider picker
+before testing two queued model turns. A new real-Docker test proves that bridge
+state persists while the project mount remains readonly.
+
+Observed: a separate CLI process resumed the live free-model conversation and
+recalled the original marker. Published machine-readable evidence confirms chat
+continuity, cross-process continuity, the expected code change, passing tests,
+unchanged fixture tests and untouched original source. Model reported $0 cost.
+
+Validation: **41 unit/protocol/CLI tests passed, 1 Windows symlink skip; 6 real
+Docker tests passed; official bridge image smoke passed; 28 modules syntax checked.**
+Checkpoint 10 passed all 8 GitHub CI jobs. Updated README now starts with real chat,
+includes install/uninstall and source-only use, and shows a rendered real transcript
+excerpt. Expanded upstream research documents the implemented choices and gaps.
+
+Overhead sample: 82.9 ms median startup, 49.2 MB import RSS, about 103 KB runtime
+source, zero runtime npm dependencies. No global CLI was reinstalled; packaging
+checks use a repository-local temporary npm prefix and uninstall that test package.
+
 ## Provider research decision
 
 OpenCode's current [inference documentation](https://opencode.ai/docs/console/api/inference/)

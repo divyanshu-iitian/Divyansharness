@@ -9,8 +9,8 @@
   </g>
   <g font-family="ui-monospace, SFMono-Regular, Consolas, monospace">
     <text x="80" y="102" font-size="14" letter-spacing="3" fill="#89ddca">OPEN SOURCE / LOCAL SANDBOX / TERMINAL</text>
-    <text x="74" y="212" font-size="106" font-weight="700" letter-spacing="-7" fill="#f5f7ed">divyansharness<tspan fill="#89ddca">_</tspan></text>
-    <text x="80" y="268" font-size="23" fill="#bdcbd1">Think freely. Change deliberately.</text>
+    <text x="74" y="212" font-size="62" font-weight="700" letter-spacing="-3" fill="#f5f7ed">divyansharness<tspan fill="#89ddca">_</tspan></text>
+    <text x="80" y="268" font-size="23" fill="#bdcbd1">Talk. Plan. Build. Verify.</text>
     <text x="80" y="368" font-size="17" fill="#89ddca">01 stage</text>
     <text x="280" y="368" font-size="17" fill="#bdcbd1">02 build</text>
     <text x="480" y="368" font-size="17" fill="#bdcbd1">03 verify</text>

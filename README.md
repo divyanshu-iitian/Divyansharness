@@ -8,16 +8,17 @@
   <a href="https://github.com/divyanshu-iitian/Divyansharness/releases"><img src="https://img.shields.io/github/v/release/divyanshu-iitian/Divyansharness?include_prereleases" alt="Latest release"></a>
 </p>
 
-**Divyansharness is a small, open-source terminal coding harness.** Give it a task. It works
-in a staged copy, runs commands in local Docker, checks its work, and leaves you a
-diff to apply. The native runtime has **zero npm dependencies**.
+**Divyansharness is an open-source terminal chat and coding harness.** Start a
+conversation, choose a free or local model, then use `/build` to work on your project.
+Coding happens in a staged copy with local Docker and verification before apply.
+The native runtime has **zero npm dependencies**.
 
 **Experimental v0.2.** Model quality still matters. This is not a benchmark-proven
 replacement for OpenCode, DeepSeek Harness, or your code review.
 
 ```text
-your task → isolated workspace → tools → verification → diff → you apply
-               original files stay unchanged until that last step
+chat → /plan → /build → /diff → /verify → /apply
+       original files stay unchanged until you explicitly apply
 ```
 
 [Quick start](#quick-start) · [Free models](#choose-your-model) · [Architecture](docs/ARCHITECTURE.md) · [Evidence](docs/EVALUATION.md) · [Build log](WORKLOG.md)
@@ -49,22 +50,49 @@ Windows/macOS users can use Docker Desktop. No cloud sandbox subscription needed
 
 ```sh
 npm install -g https://github.com/divyanshu-iitian/Divyansharness/releases/download/v0.2.0/divyanshu-iitian-divyansharness-0.2.0.tgz
-divyansharness sandbox setup
-divyansharness doctor
-divyansharness demo
+divyansharness
 ```
 
-`demo` needs **no model or API key**. It uses a scripted tool sequence against real
-Docker: fix a tiny bug, pass `node --test`, produce a reviewable session.
-It demonstrates the machinery; it is not an LLM evaluation.
+On first launch, choose a provider and model. **OpenCode free models** use the
+official client in a local container; the CLI prepares the image if needed. Start
+Docker Desktop first. Ollama/native chat can run without Docker; coding needs it.
 
-From source:
+```text
+you [chat] > Help me design a small notes CLI.
+you [chat] > /plan
+you [plan] > Inspect the project and suggest the smallest change.
+you [plan] > /build
+you [build] > Implement that plan and run the tests.
+you [build] > /diff
+you [build] > /apply
+```
+
+`/model` switches models; `/resume` reopens a conversation. `/multiline` accepts a
+block ending with `/send`. `/help` lists all commands. Ctrl+C cancels an answer.
+Normal chat starts with no project attached. `/plan` or `/build` attaches it explicitly.
+
+<p align="center"><img src="assets/chat.svg" alt="Excerpt of a real free-model chat, follow-up, and verified coding session" width="100%"></p>
+
+`divyansharness demo` remains an optional model-free plumbing check: a scripted
+sequence with real Docker. Normal startup opens model chat.
+
+### Run from this repository without installing globally
 
 ```sh
 git clone https://github.com/divyanshu-iitian/Divyansharness.git
 cd Divyansharness
-npm install -g .
+npm start
 ```
+
+### Uninstall
+
+```sh
+npm uninstall -g @divyanshu-iitian/divyansharness
+```
+
+For the old v0.1 package: `npm uninstall -g @divyanshu-iitian/dhaara`.
+Uninstall removes the command; local sessions and Docker images remain. The original
+requested name, **Divyansharness**, is restored in v0.2.
 
 ## Choose your model
 
@@ -94,7 +122,7 @@ Free access is not unlimited or guaranteed.
 The bridge grants outbound access to the whole container. OpenCode owns its loop;
 Divyansharness supplies staging, container limits, independent **offline** verification
 and conflict-checked apply. It uses a whole-run timeout, not native turn/token
-budgets. Native `resume` does not resume OpenCode sessions.
+budgets. `/resume` and `resume SESSION` continue its saved official-client conversation.
 
 ### Local Ollama
 
@@ -106,9 +134,9 @@ divyansharness models --provider ollama
 divyansharness run "Fix the failing tests" --provider ollama --model YOUR_LOCAL_MODEL --verify "npm test"
 ```
 
-Ollama is the default provider at `http://localhost:11434/v1`. Select a model
-explicitly: automatic selection uses the first catalog entry, not a memory-aware
-recommendation. Tiny models can fail tool use; our 1.5B smoke run failed honestly.
+Ollama defaults to `http://localhost:11434/v1`. The chooser displays model weight
+sizes and sorts the local catalog by size. Weight size does not guarantee that a
+model fits available RAM/VRAM. Tiny models can fail tool use; our 1.5B smoke run failed.
 See [published results](docs/EVALUATION.md).
 
 ### OpenRouter free models
@@ -157,15 +185,15 @@ divyansharness run "Fix the parser" --max-turns 12 --max-tokens 60000 --timeout 
 ```
 
 Run `divyansharness --model YOUR_LOCAL_MODEL` for the terminal conversation. Commands:
-`/plan`, `/build`, `/new`, `/models`, `/diff`, `/status`, `/help`, `/exit`.
+`/chat`, `/plan`, `/build`, `/model`, `/provider`, `/resume`, `/new`, `/diff`,
+`/verify`, `/apply`, `/status`, `/multiline`, `/help`, `/exit`.
 `Ctrl+C` cancels active work. `--json` emits newline-delimited events for scripting.
 
 ## Small core, honest resource costs
 
-About **78 KB of runtime source**, seven tools, zero runtime npm dependencies.
-A final seven-run Windows batch observed **145 ms median** CLI startup and
-**49 MB RSS** after importing the CLI. These are machine-specific observations;
-reproduce with `npm run bench`. [Method and environment](docs/EVALUATION.md).
+A small native runtime, seven coding tools, zero runtime npm dependencies.
+Reproduce startup/RSS measurements with `npm run bench`.
+[Measured versions, method and environment](docs/EVALUATION.md).
 
 Docker and model inference are **additional** costs. Native command containers
 default to 512 MiB RAM, one CPU, 128 PIDs and 128 MiB temporary storage. The optional
@@ -181,9 +209,9 @@ repos. See [usage and troubleshooting](docs/USAGE.md).
 | Check | Observed result |
 |---|---|
 | Unit/protocol tests | Stale edits, conflicts, traversal, stream truncation, recovery, free routing, failure gating |
-| Cross-platform CI | Node 22/24 on Linux, macOS and Windows |
+| Cross-platform CI | Node 22/24 on Linux, macOS and Windows; first-run picker and multi-turn CLI tests |
 | Real Docker tests | Offline networking, readonly root/plan mount, host-secret exclusion, timeout/abort cleanup |
-| Live OpenCode / big-pickle smoke | Passed visible and controller-owned probes; fixture tests/original source unchanged |
+| Live OpenCode / big-pickle smoke | v0.2 chat → follow-up → build → restart/resume passed; original files unchanged |
 | Native Ollama / qwen2.5:1.5b | Failed; stopped without accepting completion |
 | Native Ollama / qwen2.5:3b | Model load failed with CUDA out-of-memory on this machine |
 
@@ -200,7 +228,7 @@ npm run test:sandbox
 npm run eval:smoke -- --bridge --network --model big-pickle
 ```
 
-[Evaluation](docs/EVALUATION.md) · [Research decisions](docs/RESEARCH.md) · [Architecture](docs/ARCHITECTURE.md) · [Security](SECURITY.md)
+[Evaluation](docs/EVALUATION.md) · [Latest research → implementation](docs/RESEARCH-0.2.md) · [Architecture](docs/ARCHITECTURE.md) · [Security](SECURITY.md)
 
 ## Build it in the open
 

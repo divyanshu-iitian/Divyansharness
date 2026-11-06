@@ -75,6 +75,6 @@ export function receipt(session, json = false) {
       ? `Apply   divyansharness apply ${session.id}`
       : `Verify  divyansharness verify ${session.id} --verify "your test command"`;
   console.log(
-    `  Original files unchanged.\n  Review  divyansharness diff ${session.id}\n  ${next}\n  Resume  divyansharness resume ${session.id} "continue"\n`,
+    `  Original files unchanged.\n  Review  divyansharness diff ${session.id}\n  ${next}\n  ${session.model === 'scripted-demo' ? 'Chat    divyansharness' : `Resume  divyansharness resume ${session.id} "continue"`}\n`,
   );
 }

@@ -1,0 +1,27 @@
+{
+  "version": "0.2.0",
+  "date": "2026-11-06T21:16:53.738Z",
+  "kind": "live-chat-build-resume-smoke",
+  "model": "opencode/big-pickle",
+  "officialClient": "2.2.5",
+  "session": "mw5gpuw5-0e4adcd0f4",
+  "status": "verified",
+  "chatFollowUpRemembered": true,
+  "resumedProcessRemembered": true,
+  "bridgeSessionPersisted": true,
+  "implementationChanged": true,
+  "testsUnchanged": true,
+  "originalUnchanged": true,
+  "checks": [
+    {
+      "command": "node --test",
+      "code": 0
+    }
+  ],
+  "usage": {
+    "input": 1369,
+    "output": 336,
+    "cost": 0
+  },
+  "passed": true
+}

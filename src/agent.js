@@ -83,6 +83,10 @@ export async function runAgent(
     durationMs = 600000,
   } = {},
 ) {
+  assert(
+    session.status !== 'applied',
+    'An applied session cannot be resumed. Start a new session.',
+  );
   const release = await lock(session);
   const deadline = Date.now() + durationMs;
   const combined = signal
@@ -129,7 +133,10 @@ export async function runAgent(
       );
       messages[0].content += `\nRemaining time: ${Math.max(0, Math.round((deadline - Date.now()) / 1000))}s. Turn ${turn + 1}/${maxTurns}.`;
       onEvent({ type: 'turn', turn: turn + 1, model: provider.model });
-      const response = await provider.complete(messages, TOOLS, {
+      const availableTools = session.options.plan
+        ? TOOLS.filter((t) => t.function.name !== 'edit_file')
+        : TOOLS;
+      const response = await provider.complete(messages, availableTools, {
         signal: combined,
         maxTokens: Math.min(4096, Math.max(1, maxTokens - consumed)),
         onToken: (text) => onEvent({ type: 'token', text }),

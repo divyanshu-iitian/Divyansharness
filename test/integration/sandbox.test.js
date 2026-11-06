@@ -73,3 +73,17 @@ test('real Docker: scripted demo verifies bug fix and preserves original', async
   // Demo creates a dedicated temp example. Cleanup only this observed test-owned path.
   await rm(s.original, { recursive: true, force: true });
 });
+test('real Docker: bridge state persists separately while project stays read-only', async () => {
+  const stage = await mkdtemp(path.join(root, 'state-stage-'));
+  const stateDirectory = await mkdtemp(path.join(root, 'private-state-'));
+  const sandbox = new DockerSandbox(stage, { stateDirectory });
+  const first = await sandbox.run(
+    'echo remembered > "$HOME/memory"; if touch /workspace/forbidden; then exit 9; fi',
+    { readOnly: true },
+  );
+  assert.equal(first.code, 0, first.stderr);
+  const second = await sandbox.run('cat "$HOME/memory"', { readOnly: true });
+  assert.equal(second.code, 0, second.stderr);
+  assert.equal(second.stdout.trim(), 'remembered');
+  await assert.rejects(readFile(path.join(stage, 'forbidden')), (e) => e.code === 'ENOENT');
+});
