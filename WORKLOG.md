@@ -22,6 +22,27 @@ Observed validation:
 
 Pending: CLI, unit/integration tests, provider checks, packaging and first release.
 
+## 02 — Provider adapters and agent loop
+
+Implemented native SSE Chat Completions, bounded retries, local Ollama discovery,
+live zero-price OpenRouter catalog filtering, strict tool argument checks, persistent
+tool records, recovery markers for interrupted actions, bounded context, checkpoints,
+and independent completion verification. No automatic paid fallback.
+
+Validation: all JavaScript modules passed `node --check` through `npm run check`.
+Protocol boundary and failure-case tests follow in the hardening checkpoint.
+
+## 03 — Terminal workflow and executable demo
+
+Implemented interactive and one-shot CLI, plan/build modes, JSON event output,
+sessions, diff, verify, apply, resume, doctor, sandbox setup, and an optional official
+OpenCode bridge. Added a tiny reproducible bug fixture.
+
+Validation: `node bin/dhaara.js demo` completed against real local Docker:
+read → hash-checked edit → `node --test` → verified. Original fixture unchanged.
+The demo is scripted and is explicitly labeled as such; it is not an LLM benchmark.
+Bridge image build and live provider tests are still pending.
+
 ## Provider research decision
 
 OpenCode's current [inference documentation](https://opencode.ai/docs/console/api/inference/)
