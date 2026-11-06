@@ -84,6 +84,6 @@ export async function runAgent(session,provider,sandbox,{prompt,signal,onEvent=(
       session.status='running';await save(session);
     }
     session.status='budget-exhausted';await save(session);onEvent({type:'done',session:session.id,status:session.status,summary:'Turn budget reached. Progress saved.',usage:session.usage});return session;
-  }catch(e){session.status=combined.aborted?'interrupted':'failed';session.error=e.message;await save(session);await event(session,'error',{message:e.message});throw e;}
+  }catch(e){session.status=combined.aborted?'interrupted':'failed';session.error=e.message;await save(session);await event(session,'error',{message:e.message});throw new Error(`${e.message}\nSession saved: ${session.id}. Inspect with dhaara show ${session.id}.`,{cause:e});}
   finally{await release();}
 }

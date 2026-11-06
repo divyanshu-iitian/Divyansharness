@@ -1,0 +1,49 @@
+[
+    {
+        "task":  "tiny-duration-bug-v1",
+        "kind":  "live-smoke-not-benchmark",
+        "date":  "2026-11-06T20:33:07.282Z",
+        "provider":  "opencode-bridge",
+        "model":  "opencode/big-pickle",
+        "passed":  true,
+        "session":  "mw5flth4-f264a43d1e",
+        "status":  "verified",
+        "usage":  {
+                      "input":  21366,
+                      "output":  432,
+                      "cost":  0
+                  },
+        "testsUnchanged":  true,
+        "originalUnchanged":  true,
+        "changes":  [
+                        {
+                            "path":  "duration.js",
+                            "type":  "modify"
+                        }
+                    ],
+        "heldOutPassed":  true,
+        "durationMs":  21622
+    },
+    {
+        "task":  "tiny-duration-bug-v1",
+        "kind":  "live-smoke-not-benchmark",
+        "date":  "2026-11-06T20:34:02.721Z",
+        "provider":  "ollama",
+        "model":  "qwen2.5:1.5b",
+        "passed":  false,
+        "session":  "mw5fmzut-65f0e10109",
+        "status":  "stalled",
+        "usage":  {
+                      "input":  5383,
+                      "output":  347,
+                      "cost":  0
+                  },
+        "testsUnchanged":  true,
+        "originalUnchanged":  true,
+        "changes":  [
+
+                    ],
+        "heldOutPassed":  false,
+        "durationMs":  19359
+    }
+]

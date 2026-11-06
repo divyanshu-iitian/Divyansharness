@@ -7,11 +7,22 @@ import { assert } from './util.js';
 export const BRIDGE_IMAGE='dhaara-opencode:2.2.5';
 // Inspect every event, including those evicted from the bounded output tail.
 export function bridgeEvents() {
-  let buffer='',count=0,error=false,overflow=false;
-  const line=text=>{try{const data=JSON.parse(text);count++;if(data.type==='error'||data.error)error=true;}catch{}};
+  let buffer='',count=0,error=false,overflow=false,stopped=false;
+  const seen=new Set(),usage={input:0,output:0,cost:0};
+  const line=text=>{try{
+    const data=JSON.parse(text);count++;if(data.type==='error'||data.error)error=true;
+    if(data.type==='step_finish'&&data.part){
+      if(data.part.reason==='stop')stopped=true;
+      if(data.part.id&&!seen.has(data.part.id)){
+        seen.add(data.part.id);
+        for(const key of ['input','output'])if(Number.isFinite(data.part.tokens?.[key]))usage[key]+=data.part.tokens[key];
+        if(Number.isFinite(data.part.cost))usage.cost+=data.part.cost;
+      }
+    }
+  }catch{}};
   return {
     push(text){buffer+=text;if(buffer.length>2*1024*1024){overflow=true;buffer='';return;}let end;while((end=buffer.indexOf('\n'))!==-1){line(buffer.slice(0,end));buffer=buffer.slice(end+1);}},
-    finish(){if(buffer.trim())line(buffer);return {count,error,overflow};}
+    finish(){if(buffer.trim()){line(buffer);buffer='';}return {count,error,overflow,stopped,usage};}
   };
 }
 export async function bridge(workspace,prompt,options,{signal,onEvent=()=>{}}={}) {
@@ -30,11 +41,13 @@ export async function bridge(workspace,prompt,options,{signal,onEvent=()=>{}}={}
     const events=bridgeEvents();
     const result=await sandbox.run('mkdir -p "$HOME" && opencode run --standalone --auto --format json --model "$DHAARA_BRIDGE_MODEL" "$DHAARA_BRIDGE_PROMPT"',{signal,environment,timeout:options.durationMs??600000,onData:(text,stderr)=>{if(!stderr)events.push(text);onEvent({type:'bridge_output',text});}});
     const observed=events.finish();
+    session.usage=observed.usage;
     await event(session,'bridge_exit',{code:result.code,durationMs:result.durationMs,events:observed,stdoutTail:result.stdout,stderrTail:result.stderr});
     assert(result.code===0,`Official OpenCode CLI exited ${result.code}. ${result.stderr.slice(-1200)}\nSession ${session.id} is saved. Provider free-tier access is not guaranteed.`);
     // Some CLIs return 0 while reporting provider errors as JSON events.
     assert(!observed.error&&!observed.overflow,`OpenCode reported an error or oversized event. Inspect session ${session.id}; no completion accepted.`);
     assert(observed.count>0,'OpenCode returned no JSON events. No completion accepted.');
+    assert(observed.stopped,'OpenCode returned no final stop event. Inspect the saved session before retrying.');
     session.summary='Official OpenCode run completed. Dhaara independently checked the staged workspace.';
     // Verification defaults back to offline isolation, even though inference needed network.
     const checker=new DockerSandbox(session.stage,{image:options.verifyImage??'node:22-alpine',network:false});await checker.prepare();

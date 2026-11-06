@@ -5,15 +5,16 @@
   "type": "module",
   "bin": { "dhaara": "bin/dhaara.js" },
   "exports": { ".": "./src/index.js" },
-  "files": ["bin", "src", "sandbox", "examples", "docs", "README.md", "LICENSE", "SECURITY.md"],
+  "files": ["bin", "src", "sandbox", "examples", "docs", "assets", "README.md", "LICENSE", "SECURITY.md", "CONTRIBUTING.md", "WORKLOG.md"],
   "engines": { "node": ">=22" },
   "scripts": {
     "start": "node bin/dhaara.js",
-    "test": "node --test test/*.test.js",
+    "test": "node --test --test-concurrency=1 test/*.test.js",
     "test:sandbox": "node --test test/integration/*.test.js",
     "check": "node scripts/check.mjs",
     "demo": "node bin/dhaara.js demo",
     "bench": "node scripts/bench.mjs",
+    "eval:smoke": "node scripts/eval-smoke.mjs",
     "prepack": "npm run check"
   },
   "keywords": ["ai", "coding-agent", "agent-harness", "terminal", "cli", "sandbox", "docker", "ollama", "openrouter", "opencode", "local-first", "free-models", "developer-tools", "llm"],

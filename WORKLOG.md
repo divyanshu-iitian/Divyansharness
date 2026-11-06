@@ -72,8 +72,6 @@ runs, **69.6 ms median startup**, **48.8 MB RSS** after importing the CLI,
 machine-specific CLI overhead measurements, excluding Docker and model memory.
 Reproduce with `npm run bench`; raw output is written to `artifacts/overhead.json`.
 
-## Provider research decision
-
 ## 06 — Failure feedback and bridge startup repair
 
 Observed a real local `qwen2.5:1.5b` run fail the tiny bug task: it proposed fixes
@@ -91,6 +89,24 @@ Provider parsing rejects truncated completions and oversized multiline SSE event
 Validation: **32 unit/protocol tests passed, 1 Windows symlink test skipped**;
 20 modules passed syntax checks. Previous checkpoint's seven GitHub CI jobs passed
 on Node 22/24 across Linux, Windows and macOS, including real Docker isolation.
+
+## 07 — Real model evaluation and release documentation
+
+The repaired official OpenCode 2.2.5 bridge completed a real `big-pickle` task.
+A repeatable smoke evaluator then checked visible tests, separate controller-owned
+probes, unchanged fixture tests, unchanged original source and exactly one expected
+file edit: **passed in 21.6 seconds**, reported model cost **$0**.
+
+Native Ollama `qwen2.5:1.5b` failed the same task and correctly stopped as `stalled`.
+`qwen2.5:3b` could not load due to CUDA allocation failure. These failures are
+documented beside the success; no native model quality win is claimed. Unloaded
+the model started for these tests after host memory pressure caused Node allocation
+failures. Subsequent sequential tests passed: **33 passed, 1 skipped**, 21 modules
+syntax checked. Test execution now uses one worker to keep its memory footprint low.
+
+Added reproducible live evaluation, bridge usage/final-stop receipts, finished README,
+vector branding, usage/troubleshooting and published evaluation methodology/results.
+Release packaging and latest-commit CI are the remaining release gate.
 
 ## Provider research decision
 
