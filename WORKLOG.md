@@ -60,6 +60,18 @@ Validation on Windows:
 Follow-up: host Node 25 emitted native OOM crashes during live network probes after
 the image build. Investigating runtime/environment stability before release.
 
+## 05 — CI, architecture and contributor workflow
+
+Added Node 22/24 tests on Linux, macOS and Windows, plus a real-Docker CI job.
+Documented architecture, provider access, security boundaries, research decisions,
+contribution rules, issue templates and a measurement-first roadmap.
+
+Local CLI overhead sample (Windows, Node 25.2.1, i5-13420H): 7 version-command
+runs, **69.6 ms median startup**, **48.8 MB RSS** after importing the CLI,
+**61,655 bytes** of runtime source, **0 runtime npm dependencies**. These are
+machine-specific CLI overhead measurements, excluding Docker and model memory.
+Reproduce with `npm run bench`; raw output is written to `artifacts/overhead.json`.
+
 ## Provider research decision
 
 OpenCode's current [inference documentation](https://opencode.ai/docs/console/api/inference/)

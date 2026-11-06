@@ -1,0 +1,15 @@
+name: Feature proposal
+description: Propose a measurable improvement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Which task fails or costs too much today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior and how to evaluate it
+    validations:
+      required: true
