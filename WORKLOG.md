@@ -43,6 +43,23 @@ read → hash-checked edit → `node --test` → verified. Original fixture unch
 The demo is scripted and is explicitly labeled as such; it is not an LLM benchmark.
 Bridge image build and live provider tests are still pending.
 
+## 04 — Adversarial tests and local sandbox verification
+
+Added tests for traversal, NTFS alternate streams, device names, stale edits,
+overlapping edits, all-file conflict preflight, post-verification changes,
+ignore-file tampering, locks, interrupted action recovery, context/tool pairing,
+fragmented SSE, truncated streams, credential redirects and terminal escapes.
+
+Validation on Windows:
+- Unit/protocol: **25 passed, 1 skipped** (symlink creation needs Windows privilege).
+- Real Docker: **5 passed** — offline networking, readonly root, no host secret env,
+  writable staging, readonly plan mount, timeout cleanup, abort cleanup, demo checks.
+- Optional OpenCode 2.2.5 image built successfully.
+- Live Ollama, OpenRouter and OpenCode catalog discovery returned models.
+
+Follow-up: host Node 25 emitted native OOM crashes during live network probes after
+the image build. Investigating runtime/environment stability before release.
+
 ## Provider research decision
 
 OpenCode's current [inference documentation](https://opencode.ai/docs/console/api/inference/)

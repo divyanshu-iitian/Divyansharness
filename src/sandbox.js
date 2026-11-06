@@ -3,6 +3,8 @@ import { exec, uid, assert } from './util.js';
 export const DEFAULT_IMAGE = 'node:22-alpine';
 export class DockerSandbox {
   constructor(workspace, { image=DEFAULT_IMAGE, network=false, memory=512, cpus=1, timeout=60000 }={}) {
+    assert(/^[a-zA-Z0-9][a-zA-Z0-9._/:@-]*$/.test(image),'Invalid Docker image reference.');
+    assert(Number.isInteger(memory)&&memory>=128&&memory<=8192&&Number.isFinite(cpus)&&cpus>0&&cpus<=8,'Invalid sandbox resource limits.');
     this.workspace=workspace; this.image=image; this.network=network; this.memory=memory; this.cpus=cpus; this.timeout=timeout;
   }
   async prepare() {

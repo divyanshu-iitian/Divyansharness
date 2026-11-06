@@ -58,7 +58,7 @@ function options(args) {
   const {values:v,positionals:p}=parseArgs({args,allowPositionals:true,options:{
     help:{type:'boolean',short:'h'},version:{type:'boolean',short:'v'},json:{type:'boolean'},provider:{type:'string'},model:{type:'string'},'base-url':{type:'string'},cwd:{type:'string'},verify:{type:'string',multiple:true},image:{type:'string'},network:{type:'boolean'},'max-turns':{type:'string'},'max-tokens':{type:'string'},timeout:{type:'string'},'command-timeout':{type:'string'},'allow-unverified':{type:'boolean'},'require-verification':{type:'boolean'},bridge:{type:'boolean'}
   }});
-  return {v,p,config:{provider:v.provider,model:v.model,baseURL:v['base-url'],verify:v.verify,image:v.image,network:v.network??false,requireVerification:v['require-verification']??false,maxTurns:integer(v['max-turns']??24,'max-turns',1,200),maxTokens:integer(v['max-tokens']??160000,'max-tokens',1000,10000000),durationMs:integer(v.timeout??600,'timeout',1,7200)*1000,commandTimeout:integer(v['command-timeout']??60,'command-timeout',1,120)*1000}};
+  return {v,p,config:{provider:v.provider,model:v.model,baseURL:v['base-url'],verify:v.verify,image:v.image,network:v.network,requireVerification:v['require-verification'],maxTurns:integer(v['max-turns']??24,'max-turns',1,200),maxTokens:integer(v['max-tokens']??160000,'max-tokens',1000,10000000),durationMs:integer(v.timeout??600,'timeout',1,7200)*1000,commandTimeout:integer(v['command-timeout']??60,'command-timeout',1,120)*1000}};
 }
 async function withCancellation(fn) {
   const controller=new AbortController();const cancel=()=>controller.abort(new DOMException('Cancelled; session saved.','AbortError'));
@@ -71,7 +71,7 @@ async function nativeRun(command,prompt,config,cwd,onEvent,signal,id) {
   const provider=await resolveProvider({...config,signal});
   session??=await createSession(cwd,{...config,plan:command==='plan'});
   if(command==='run'||command==='plan')session.options.plan=command==='plan';
-  session.options={...session.options,...config};
+  session.options={...session.options,...Object.fromEntries(Object.entries(config).filter(([,v])=>v!==undefined))};
   const sandbox=new DockerSandbox(session.stage,{...config,timeout:config.commandTimeout});
   return runAgent(session,provider,sandbox,{prompt,signal,onEvent,...config});
 }

@@ -3,7 +3,7 @@ import { constants } from 'node:fs';
 import { readdir, lstat, readFile, writeFile, mkdir, realpath, copyFile, rename, unlink, open } from 'node:fs/promises';
 import { assert, sha, uid, truncate } from './util.js';
 
-const EXCLUDED = new Set(['.git', '.dhaara', 'node_modules', '.venv', 'venv', '__pycache__', '.next', '.nuxt', 'dist', 'build', 'coverage', '.ssh', '.aws', '.azure', '.config', '.opencode', '.npmrc', '.pypirc']);
+const EXCLUDED = new Set(['.git', '.dhaara', '.dhaaraignore', 'node_modules', '.venv', 'venv', '__pycache__', '.next', '.nuxt', 'dist', 'build', 'coverage', '.ssh', '.aws', '.azure', '.config', '.opencode', '.npmrc', '.pypirc']);
 const SECRET = /(^\.env($|\.)|\.(pem|key|p12|pfx|keystore)$|^id_(rsa|ed25519)$|^credentials(\.json)?$)/i;
 export const MAX_FILE = 1024 * 1024;
 export function blocked(relative) {
@@ -13,7 +13,7 @@ function glob(pattern) {
   return new RegExp('^' + pattern.split('').map(c => c === '*' ? '.*' : c === '?' ? '.' : c.replace(/[\\^$+?.()|{}\[\]]/g, '\\$&')).join('') + '(?:/.*)?$');
 }
 export async function rules(root) {
-  try { return (await readFile(path.join(root, '.dhaaraignore'), 'utf8')).split(/\r?\n/).map(s => s.trim()).filter(s => s && !s.startsWith('#')).map(s => glob(s.replace(/^\//, '').replace(/\/$/, ''))); }
+  try { const file=path.join(root,'.dhaaraignore');assert(!(await lstat(file)).isSymbolicLink(),'.dhaaraignore cannot be a symlink.');return (await readFile(file, 'utf8')).split(/\r?\n/).map(s => s.trim()).filter(s => s && !s.startsWith('#')).map(s => glob(s.replace(/^\//, '').replace(/\/$/, ''))); }
   catch (e) { if (e.code === 'ENOENT') return []; throw e; }
 }
 /** Reject traversal, links, reserved names and non-portable paths on every platform. */
@@ -31,9 +31,9 @@ export async function safePath(root, relative) {
   }
   return candidate;
 }
-export async function inventory(root, { maxFiles = 5000, maxBytes = 64 * 1024 * 1024 } = {}) {
+export async function inventory(root, { maxFiles = 5000, maxBytes = 64 * 1024 * 1024, useIgnore = false } = {}) {
   const files = {}; let bytes = 0;
-  const ignores = await rules(root);
+  const ignores = useIgnore ? await rules(root) : [];
   async function walk(dir, prefix = '') {
     const entries = (await readdir(dir, { withFileTypes: true })).sort((a,b) => a.name.localeCompare(b.name));
     for (const item of entries) {
@@ -56,7 +56,7 @@ export async function inventory(root, { maxFiles = 5000, maxBytes = 64 * 1024 * 
 }
 export async function snapshot(source, stage, baseline) {
   const original = await realpath(source);
-  const files = await inventory(original);
+  const files = await inventory(original, { useIgnore: true });
   for (const dest of [stage, baseline]) {
     await mkdir(dest, { recursive: true, mode: 0o700 });
     for (const [rel, info] of Object.entries(files)) {
