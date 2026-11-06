@@ -46,12 +46,23 @@ export async function listModels(provider = 'openrouter', options = {}) {
   }
   const base = endpoint(options.baseURL || 'http://localhost:11434/v1');
   const data = await fetchJSON(`${base}/models`, options);
-  return data.data.map((m) => ({
+  const models = data.data.map((m) => ({
     id: m.id,
     name: m.id,
     free: provider === 'ollama',
     context: 32000,
   }));
+  if (provider === 'ollama') {
+    try {
+      const tags = await fetchJSON(`${base.replace(/\/v1$/, '')}/api/tags`, options);
+      for (const model of models)
+        model.bytes = tags.models?.find((m) => m.name === model.id || m.model === model.id)?.size;
+    } catch (e) {
+      if (options.signal?.aborted) throw e;
+    }
+    models.sort((a, b) => (a.bytes ?? Infinity) - (b.bytes ?? Infinity));
+  }
+  return models;
 }
 export async function resolveProvider(options = {}) {
   const kind = options.provider || 'ollama';
@@ -70,7 +81,7 @@ export async function resolveProvider(options = {}) {
     kind === 'openrouter'
       ? process.env.OPENROUTER_API_KEY
       : kind === 'compatible'
-        ? (process.env.DIVYANSHARNESS_API_KEY || process.env.DHAARA_API_KEY)
+        ? process.env.DIVYANSHARNESS_API_KEY || process.env.DHAARA_API_KEY
         : undefined;
   if (kind === 'openrouter')
     assert(
@@ -160,11 +171,11 @@ export class ChatProvider {
     const request = {
       model: this.model,
       messages,
-      tools,
       stream: true,
       stream_options: { include_usage: true },
       max_tokens: maxTokens,
     };
+    if (tools?.length) request.tools = tools;
     if (this.kind === 'openrouter')
       request.provider = { max_price: { prompt: 0, completion: 0 }, require_parameters: true };
     const headers = { 'content-type': 'application/json' };

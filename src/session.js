@@ -1,18 +1,26 @@
 import os from 'node:os';
 import path from 'node:path';
-import { mkdir, readFile, appendFile, readdir, open, unlink } from 'node:fs/promises';
+import { mkdir, readFile, appendFile, readdir, open, unlink, realpath } from 'node:fs/promises';
 import { atomicJSON, uid, assert } from './util.js';
 import { snapshot } from './workspace.js';
 
 export const home = () =>
-  path.resolve(process.env.DIVYANSHARNESS_HOME || process.env.DHAARA_HOME || path.join(os.homedir(), '.divyansharness'));
+  path.resolve(
+    process.env.DIVYANSHARNESS_HOME ||
+      process.env.DHAARA_HOME ||
+      path.join(os.homedir(), '.divyansharness'),
+  );
 export async function createSession(workspace, options = {}) {
   const id = uid(),
     dir = path.join(home(), 'sessions', id);
   await mkdir(dir, { recursive: true, mode: 0o700 });
   const stage = path.join(dir, 'workspace'),
     baseline = path.join(dir, 'baseline');
-  const data = await snapshot(workspace, stage, baseline);
+  const data = options.chatOnly
+    ? { original: await realpath(workspace), files: {} }
+    : await snapshot(workspace, stage, baseline);
+  await mkdir(stage, { recursive: true, mode: 0o700 });
+  await mkdir(baseline, { recursive: true, mode: 0o700 });
   const session = {
     version: 1,
     id,
@@ -37,8 +45,16 @@ export async function loadSession(id) {
     typeof id === 'string' && /^[a-z0-9]+-[a-f0-9]{10}$/.test(id),
     'Invalid session ID. Use divyansharness sessions.',
   );
-  const dir = path.join(home(), 'sessions', id);
-  const session = JSON.parse(await readFile(path.join(dir, 'session.json'), 'utf8'));
+  let dir = path.join(home(), 'sessions', id),
+    raw;
+  try {
+    raw = await readFile(path.join(dir, 'session.json'), 'utf8');
+  } catch (e) {
+    if (e.code !== 'ENOENT' || process.env.DIVYANSHARNESS_HOME || process.env.DHAARA_HOME) throw e;
+    dir = path.join(os.homedir(), '.dhaara', 'sessions', id);
+    raw = await readFile(path.join(dir, 'session.json'), 'utf8');
+  }
+  const session = JSON.parse(raw);
   assert(session.version === 1 && session.id === id, 'Unsupported session format.');
   // Storage paths never come from editable JSON.
   return {
@@ -47,6 +63,21 @@ export async function loadSession(id) {
     stage: path.join(dir, 'workspace'),
     baseline: path.join(dir, 'baseline'),
   };
+}
+export async function stageConversation(session) {
+  if (!session.options.chatOnly) return;
+  const release = await lock(session);
+  try {
+    // Only an explicit /plan or /build attaches project files to a conversation.
+    const data = await snapshot(session.original, session.stage, session.baseline);
+    Object.assign(session, data);
+    session.options.chatOnly = false;
+    session.task = null;
+    await save(session);
+    await event(session, 'workspace_attached', { files: Object.keys(data.files).length });
+  } finally {
+    await release();
+  }
 }
 export async function save(session) {
   session.updated = new Date().toISOString();
@@ -75,6 +106,9 @@ export async function sessions() {
         id: s.id,
         status: s.status,
         original: s.original,
+        provider: s.options.provider,
+        model: s.model,
+        mode: s.options.mode,
         created: s.created,
         updated: s.updated,
       });

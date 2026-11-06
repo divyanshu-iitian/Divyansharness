@@ -134,6 +134,25 @@ Renamed the current package, executable, UI and documentation to **Divyansharnes
 The original v0.1.0 release remains a historical artifact; v0.2.0 development follows.
 Legacy environment names remain accepted for explicit migration.
 
+## 10 — Real terminal chat and persistent free-provider conversations
+
+Added a default chat interface, provider/model chooser, safe saved preferences,
+chat/plan/build modes, multiline input and queued prompts. Native chat sends no
+tools and snapshots no project files. /plan or /build explicitly attaches the
+workspace while retaining the conversation. Added in-chat review, verification,
+apply, model switching, session selection and cancellation.
+
+Official OpenCode now persists its own conversation state in a dedicated per-session
+directory, separate from the project and original host home. JSON events become
+readable responses/tool steps. Chat/plan mounts are readonly; build is staged.
+
+Observed real CLI/free-model flow: remembered a marker across two chat turns,
+switched to /build in the same session, repaired the tiny fixture, independently
+passed node --test, and displayed the expected diff. Original tests/source unchanged.
+Validation: 39 unit/protocol/CLI tests passed, 1 Windows symlink test skipped.
+New tests cover chat without tools/files, context retention, explicit project
+attachment, secret-free preferences, queued input and the actual two-turn CLI.
+
 ## Provider research decision
 
 OpenCode's current [inference documentation](https://opencode.ai/docs/console/api/inference/)

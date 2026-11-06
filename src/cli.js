@@ -1,10 +1,11 @@
 import { parseArgs } from 'node:util';
-import { createInterface } from 'node:readline/promises';
 import { fileURLToPath } from 'node:url';
 import { createSession, loadSession, sessions, save, event, lock } from './session.js';
 import { DockerSandbox, doctor, DEFAULT_IMAGE } from './sandbox.js';
-import { resolveProvider, listModels } from './providers.js';
-import { runAgent } from './agent.js';
+import { listModels } from './providers.js';
+import { runTurn } from './runner.js';
+import { interactive } from './interactive.js';
+import { readSettings } from './settings.js';
 import { diff, applyChanges } from './workspace.js';
 import { verify } from './tools.js';
 import { demo } from './demo.js';
@@ -16,6 +17,8 @@ const HELP = `Divyansharness ${VERSION} — Think freely. Change deliberately.
 
 Usage: divyansharness [command] [task or session] [options]
 
+  chat                        Open interactive chat (also the default)
+  setup                       Choose provider/model and prepare its image
   run "task"                  Work in a staged copy; never auto-apply
   plan "task"                 Read-only exploration in a sandbox
   resume SESSION ["task"]      Continue saved work; no blind action replay
@@ -31,7 +34,7 @@ Usage: divyansharness [command] [task or session] [options]
   demo                        Scripted bug fix; REAL Docker and verification
 
 Options:
-  --provider ollama|openrouter|compatible  Default: ollama
+  --provider opencode|ollama|openrouter|compatible
   --model ID                  Exact model ID; live catalog validation
   --base-url URL              Local or compatible Chat Completions endpoint
   --cwd PATH                  Source workspace (default: current directory)
@@ -52,7 +55,8 @@ Set OPENROUTER_API_KEY. No automatic paid fallback. Limits still apply.
 Compatible mode uses DIVYANSHARNESS_API_KEY and may incur provider charges.
 OpenCode free models require the official CLI bridge; no direct API bypass.
 
-Run without arguments in a terminal for interactive mode.
+Run divyansharness to choose a provider and chat. /build enables staged coding.
+Uninstall: npm uninstall -g @divyanshu-iitian/divyansharness
 `;
 function options(args) {
   const { values: v, positionals: p } = parseArgs({
@@ -108,27 +112,25 @@ async function withCancellation(fn) {
   }
 }
 async function nativeRun(command, prompt, config, cwd, onEvent, signal, id) {
-  assert(prompt || id, 'Provide a task, for example: divyansharness run "Fix the failing tests"');
-  let session;
-  if (id) {
-    session = await loadSession(id);
-    config = {
-      ...session.options,
-      ...Object.fromEntries(Object.entries(config).filter(([, v]) => v !== undefined)),
-    };
-  }
-  const provider = await resolveProvider({ ...config, signal });
-  session ??= await createSession(cwd, { ...config, plan: command === 'plan' });
-  if (command === 'run' || command === 'plan') session.options.plan = command === 'plan';
-  session.options = {
-    ...session.options,
-    ...Object.fromEntries(Object.entries(config).filter(([, v]) => v !== undefined)),
-  };
-  const sandbox = new DockerSandbox(session.stage, { ...config, timeout: config.commandTimeout });
-  return runAgent(session, provider, sandbox, { prompt, signal, onEvent, ...config });
+  const session = id ? await loadSession(id) : undefined;
+  const mode =
+    command === 'resume'
+      ? (session.options.mode ?? (session.options.plan ? 'plan' : 'build'))
+      : command === 'run'
+        ? 'build'
+        : command;
+  return runTurn({
+    session,
+    cwd: session?.original ?? cwd,
+    prompt: prompt || (id ? 'Continue from the saved conversation.' : ''),
+    mode,
+    config,
+    signal,
+    onEvent,
+  });
 }
 export async function main(args = process.argv.slice(2)) {
-  const { v, p, config } = options(args);
+  const { v, p, config: flags } = options(args);
   const cwd = v.cwd ?? process.cwd(),
     onEvent = renderer(v.json);
   if (v.version) {
@@ -139,6 +141,12 @@ export async function main(args = process.argv.slice(2)) {
     console.log(HELP);
     return;
   }
+  const config = {
+    ...(await readSettings()),
+    ...Object.fromEntries(Object.entries(flags).filter(([, v]) => v !== undefined)),
+  };
+  if (p[0] === 'setup') return interactive(config, cwd, { setupOnly: true });
+  if (p[0] === 'chat' && p.length === 1) return interactive(config, cwd);
   if (p.length === 0) {
     if (process.stdin.isTTY && !v.json) return interactive(config, cwd);
     console.log(HELP);
@@ -264,8 +272,11 @@ export async function main(args = process.argv.slice(2)) {
       return bridge(cwd, rest.join(' '), config, { signal, onEvent });
     }
     if (command === 'resume')
-      return nativeRun(command, rest.slice(1).join(' '), config, cwd, onEvent, signal, rest[0]);
-    assert(['run', 'plan'].includes(command), `Unknown command ${command}. Run divyansharness --help.`);
+      return nativeRun(command, rest.slice(1).join(' '), flags, cwd, onEvent, signal, rest[0]);
+    assert(
+      ['run', 'plan', 'chat'].includes(command),
+      `Unknown command ${command}. Run divyansharness --help.`,
+    );
     return nativeRun(command, rest.join(' '), config, cwd, onEvent, signal);
   });
   receipt(session, v.json);
@@ -275,88 +286,4 @@ export async function main(args = process.argv.slice(2)) {
     )
   )
     process.exitCode = 1;
-}
-async function interactive(config, cwd) {
-  banner();
-  console.log('  /help for commands · Ctrl+C cancels a run · /exit to leave\n');
-  const rl = createInterface({ input: process.stdin, output: process.stdout });
-  let session,
-    mode = 'run',
-    active;
-  rl.on('SIGINT', () => {
-    if (active) active.abort(new DOMException('Cancelled', 'AbortError'));
-    else rl.close();
-  });
-  try {
-    for await (const line of prompts(rl)) {
-      const text = line.trim();
-      if (!text) continue;
-      if (text === '/exit' || text === '/quit') break;
-      if (text === '/help') {
-        console.log(
-          '  /plan · /build · /new · /models · /diff · /status · /exit\n  Apply separately with: divyansharness apply SESSION\n',
-        );
-        continue;
-      }
-      if (text === '/plan') {
-        mode = 'plan';
-        console.log('  Read-only plan mode.');
-        continue;
-      }
-      if (text === '/build') {
-        mode = 'run';
-        console.log('  Build mode; changes remain staged.');
-        continue;
-      }
-      if (text === '/new') {
-        session = undefined;
-        console.log('  Next task starts a fresh snapshot.');
-        continue;
-      }
-      if (text === '/models') {
-        try {
-          console.log(
-            (await listModels(config.provider ?? 'ollama', { baseURL: config.baseURL }))
-              .map((m) => m.id)
-              .join('\n'),
-          );
-        } catch (e) {
-          console.log(safeText(e.message));
-        }
-        continue;
-      }
-      if (text === '/status') {
-        console.log(session ? `${session.id}: ${session.status}` : '  No session yet.');
-        continue;
-      }
-      if (text === '/diff') {
-        console.log(session ? safeText(await diff(session)) : '  No session yet.');
-        continue;
-      }
-      if (text.startsWith('/')) {
-        console.log('  Unknown command. Use /help.');
-        continue;
-      }
-      active = new AbortController();
-      try {
-        session = await nativeRun(mode, text, config, cwd, renderer(), active.signal, session?.id);
-        receipt(session);
-      } catch (e) {
-        console.log(`\n  ${safeText(e.message)}\n  Saved runs: divyansharness sessions\n`);
-      } finally {
-        active = undefined;
-      }
-    }
-  } finally {
-    rl.close();
-  }
-}
-async function* prompts(rl) {
-  while (!rl.closed) {
-    try {
-      yield await rl.question('  divyansharness › ');
-    } catch {
-      break;
-    }
-  }
 }

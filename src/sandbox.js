@@ -4,7 +4,14 @@ export const DEFAULT_IMAGE = 'node:22-alpine';
 export class DockerSandbox {
   constructor(
     workspace,
-    { image = DEFAULT_IMAGE, network = false, memory = 512, cpus = 1, timeout = 60000 } = {},
+    {
+      image = DEFAULT_IMAGE,
+      network = false,
+      memory = 512,
+      cpus = 1,
+      timeout = 60000,
+      stateDirectory,
+    } = {},
   ) {
     assert(/^[a-zA-Z0-9][a-zA-Z0-9._/:@-]*$/.test(image), 'Invalid Docker image reference.');
     assert(
@@ -22,6 +29,7 @@ export class DockerSandbox {
     this.memory = memory;
     this.cpus = cpus;
     this.timeout = timeout;
+    this.stateDirectory = stateDirectory;
   }
   async prepare() {
     const info = await exec('docker', ['info', '--format', '{{.OSType}}'], { timeout: 15000 });
@@ -85,6 +93,10 @@ export class DockerSandbox {
       '--env',
       'NO_COLOR=1',
     ];
+    if (this.stateDirectory) {
+      assert(!this.stateDirectory.includes(','), 'Bridge state paths cannot contain commas.');
+      args.push('--mount', `type=bind,source=${this.stateDirectory},target=/tmp/home`);
+    }
     // Only explicit names; secret values are inherited through Docker's environment lookup,
     // never command arguments, transcripts, or the workspace snapshot.
     for (const key of Object.keys(environment)) {

@@ -17,7 +17,9 @@ import { assert, sha, uid, truncate } from './util.js';
 const EXCLUDED = new Set([
   '.git',
   '.divyansharness',
+  '.dhaara',
   '.divyansharnessignore',
+  '.dhaaraignore',
   'node_modules',
   '.venv',
   'venv',
