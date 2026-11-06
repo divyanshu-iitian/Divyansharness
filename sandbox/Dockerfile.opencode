@@ -1,6 +1,9 @@
 FROM node:22-alpine
 ARG OPENCODE_VERSION=2.2.5
 RUN apk add --no-cache git libstdc++ libgcc \
-    && npm install --global @opencode/cli@${OPENCODE_VERSION} \
+    && case "$(uname -m)" in x86_64) arch=x64;; aarch64) arch=arm64;; *) exit 1;; esac \
+    && npm install --global --ignore-scripts --omit=optional "@opencode/cli-linux-${arch}-musl@${OPENCODE_VERSION}" \
+    && ln -s "/usr/local/lib/node_modules/@opencode/cli-linux-${arch}-musl/bin/opencode" /usr/local/bin/opencode \
+    && opencode --version \
     && npm cache clean --force
 WORKDIR /workspace

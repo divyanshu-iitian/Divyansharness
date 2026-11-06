@@ -22,5 +22,6 @@ export function renderer(json=false) {
 export function receipt(session,json=false) {
   const data={session:session.id,status:session.status,model:session.model,workspace:session.original,staged:session.stage,checks:session.checks?.map(c=>({command:c.command,code:c.code})),usage:session.usage};
   if(json){console.log(JSON.stringify({type:'receipt',...data}));return;}
-  console.log(`  Original files unchanged.\n  Review  dhaara diff ${session.id}\n  Apply   dhaara apply ${session.id}${session.status==='verified'?'':' --allow-unverified'}\n  Resume  dhaara resume ${session.id} "continue"\n`);
+  const next=session.status==='verified'?`Apply   dhaara apply ${session.id}`:`Verify  dhaara verify ${session.id} --verify "your test command"`;
+  console.log(`  Original files unchanged.\n  Review  dhaara diff ${session.id}\n  ${next}\n  Resume  dhaara resume ${session.id} "continue"\n`);
 }

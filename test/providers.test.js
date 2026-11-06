@@ -26,6 +26,20 @@ test('truncated streams cannot execute partial tools',async t=>{
 test('HTTP auth errors are actionable and not retried',async t=>{
   let calls=0;const baseURL=await server(t,(req,res)=>{calls++;res.writeHead(401);res.end('no key');});await assert.rejects(new ChatProvider({baseURL,model:'test'}).complete([],[]),/401/);assert.equal(calls,1);
 });
+test('length-truncated JSON responses never submit otherwise parseable tool calls',async t=>{
+  const baseURL=await server(t,(req,res)=>{res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({choices:[{message:{role:'assistant',tool_calls:[{id:'x',function:{name:'run_command',arguments:'{}'}}]},finish_reason:'length'}]}));});
+  await assert.rejects(new ChatProvider({baseURL,model:'test'}).complete([],[]),/Incomplete provider response/);
+});
+test('free requests restrict provider prices and never include paid fallbacks',async t=>{
+  let request;const baseURL=await server(t,async(req,res)=>{let body='';for await(const chunk of req)body+=chunk;request=JSON.parse(body);res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({choices:[{message:{role:'assistant',content:'ok'},finish_reason:'stop'}]}));});
+  await new ChatProvider({baseURL,model:'test:free',kind:'openrouter'}).complete([],[]);
+  assert.deepEqual(request.provider,{max_price:{prompt:0,completion:0},require_parameters:true});assert.equal(request.models,undefined);
+});
+test('SSE multiline events are bounded even when every line is short',async()=>{
+  let sent=0;const chunk=new TextEncoder().encode('data: '+'x'.repeat(1024)+'\n');
+  const body=new ReadableStream({pull(c){if(sent++<5000)c.enqueue(chunk);else c.close();}});
+  await assert.rejects(async()=>{for await(const frame of sse(body))void frame;},/event exceeds/);
+});
 test('provider never follows redirects with credentials',async t=>{
   let target=false;const baseURL=await server(t,(req,res)=>{if(req.url==='/stolen')target=true;res.writeHead(302,{location:'/stolen'});res.end();});await assert.rejects(new ChatProvider({baseURL,model:'test',apiKey:'test-secret'}).complete([],[]));assert.equal(target,false);
 });

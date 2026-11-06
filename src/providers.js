@@ -45,14 +45,14 @@ export async function resolveProvider(options={}) {
 
 /** Small, provider-neutral SSE adapter; handles arbitrary chunk/UTF-8 boundaries. */
 export async function* sse(body) {
-  const reader=body.getReader(),decoder=new TextDecoder();let buffer='',data=[];
+  const reader=body.getReader(),decoder=new TextDecoder();let buffer='',data=[],size=0;
   try {
     while(true){const {done,value}=await reader.read();buffer+=decoder.decode(value,{stream:!done});
       assert(buffer.length<4*1024*1024,'Provider SSE frame exceeds 4 MiB.');
       let at;
       while((at=buffer.indexOf('\n'))!==-1){let line=buffer.slice(0,at).replace(/\r$/,'');buffer=buffer.slice(at+1);
-        if(!line){if(data.length){yield data.join('\n');data=[];}}
-        else if(line.startsWith('data:'))data.push(line.slice(5).replace(/^ /,''));
+        if(!line){if(data.length){yield data.join('\n');data=[];size=0;}}
+        else if(line.startsWith('data:')){size+=line.length;assert(size<4*1024*1024,'Provider SSE event exceeds 4 MiB.');data.push(line.slice(5).replace(/^ /,''));}
       }
       if(done){if(buffer.startsWith('data:'))data.push(buffer.slice(5).trimStart());if(data.length)yield data.join('\n');break;}
     }
@@ -78,8 +78,11 @@ export class ChatProvider {
     }
     const message={role:'assistant',content:''};const calls=new Map();let usage={},finish;
     if(response.headers.get('content-type')?.includes('application/json')){
-      const data=await response.json();assert(!data.error,data.error?.message??'Provider error');
+      const reader=response.body.getReader(),decoder=new TextDecoder();let text='';
+      try{while(true){const {done,value}=await reader.read();text+=decoder.decode(value,{stream:!done});assert(text.length<2*1024*1024,'Provider response exceeds 2 MiB.');if(done)break;}}finally{await reader.cancel().catch(()=>{});reader.releaseLock();}
+      const data=JSON.parse(text);assert(!data.error,data.error?.message??'Provider error');
       assert(data.choices?.[0]?.message,'Provider returned no assistant message.');
+      assert(['stop','tool_calls','function_call'].includes(data.choices[0].finish_reason),'Incomplete provider response. No tool calls executed; increase the output budget or use a more capable model.');
       return {message:data.choices[0].message,usage:data.usage??{},finish:data.choices[0].finish_reason};
     }
     let received=false;
@@ -97,6 +100,7 @@ export class ChatProvider {
       assert(message.content.length+(message.reasoning_content?.length??0)+[...calls.values()].reduce((n,c)=>n+c.function.arguments.length,0)<2*1024*1024,'Provider response exceeds 2 MiB.');
     }
     assert(received && finish,'Incomplete provider stream. Retry/resume; no partial tool calls were executed.');
+    assert(['stop','tool_calls','function_call'].includes(finish),'Incomplete provider response. No tool calls executed; increase the output budget or use a more capable model.');
     if(calls.size){message.tool_calls=[...calls.values()];assert(message.tool_calls.every(c=>c.id&&c.function.name),'Incomplete tool call.');}
     return {message,usage,finish};
   }

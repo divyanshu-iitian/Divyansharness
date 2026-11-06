@@ -22,6 +22,17 @@ test('successful checks create a persisted verification receipt',async()=>{
   const s=await fixture();const provider={model:'fake',complete:async()=>({message:{role:'assistant',content:'done'},finish:'stop',usage:{prompt_tokens:20,completion_tokens:5}})};
   await runAgent(s,provider,sandbox,{prompt:'task'});const loaded=await loadSession(s.id);assert.equal(loaded.status,'verified');assert.equal(loaded.usage.input,20);assert.equal(loaded.verifiedHash.length,64);
 });
+test('unchanged failed completions stop instead of wasting the whole run budget',async()=>{
+  const s=await fixture();let calls=0;
+  const provider={model:'weak',complete:async()=>{calls++;return {message:{role:'assistant',content:'Here is a proposed patch'},finish:'stop'};}};
+  await runAgent(s,provider,{...sandbox,run:async()=>({code:1,stdout:'still broken',stderr:'',durationMs:1})},{prompt:'fix',maxTurns:12});
+  assert.equal(calls,3);assert.equal(s.status,'stalled');assert.equal(s.verifiedHash,null);
+  assert.match(s.messages.filter(m=>m.role==='tool')[0].content,/call edit_file/);
+});
+test('applied session cannot acquire a fresh verification receipt',async()=>{
+  const s=await fixture();s.status='applied';
+  await assert.rejects(executeTool('finish',{summary:'done'},{session:s,sandbox}),/cannot be reverified/);
+});
 test('plan mode cannot edit and commands get a read-only mount',async()=>{
   const s=await fixture();s.options.plan=true;await assert.rejects(executeTool('edit_file',{path:'new',content:'x'},{session:s,sandbox}),/Plan mode/);
   let readOnly=false;await executeTool('run_command',{command:'true'},{session:s,sandbox:{run:async(cmd,opts)=>{readOnly=opts.readOnly;return {code:0,stdout:'',stderr:''};}}});assert.equal(readOnly,true);
@@ -39,6 +50,7 @@ test('context compaction preserves call/result pairs',()=>{
 test('strict schema rejects unknown fields and invalid types',()=>{
   assert.throws(()=>parseTool({function:{name:'run_command',arguments:'{"command":"ls","host":true}'}}),/Unknown/);
   assert.throws(()=>parseTool({function:{name:'read_file',arguments:'{"path":"x","start":"1"}'}}),/integer/);
+  assert.throws(()=>parseTool({function:{name:'read_file',arguments:'{"path":"x","start":0}'}}),/at least 1/);
 });
 test('Docker arguments use only the stage mount and explicit restrictions',()=>{
   const s=new DockerSandbox('/tmp/stage');const args=s.args('test','echo ok');assert.ok(args.includes('none'));assert.ok(args.includes('--read-only'));assert.ok(args.includes('ALL'));assert.ok(args.includes('no-new-privileges'));assert.equal(args.filter(a=>a==='--mount').length,1);assert.ok(!args.some(a=>a.includes('docker.sock')));

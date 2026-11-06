@@ -74,6 +74,26 @@ Reproduce with `npm run bench`; raw output is written to `artifacts/overhead.jso
 
 ## Provider research decision
 
+## 06 — Failure feedback and bridge startup repair
+
+Observed a real local `qwen2.5:1.5b` run fail the tiny bug task: it proposed fixes
+in prose but did not edit the file. All verification attempts failed and no source
+changes were applied. Improved line-number schemas and actionable repair feedback;
+three unchanged failed submissions now stop with `stalled` instead of consuming
+the entire turn budget. Applied sessions cannot receive a fresh verification receipt.
+
+The first OpenCode image had truncated npm platform binaries. Installing only the
+required official platform package fixed startup; image builds now execute
+`opencode --version` and fail if the binary cannot run. Confirmed **v2.2.5** starts.
+Bridge event parsing now retains early errors even after the output tail rolls over.
+Provider parsing rejects truncated completions and oversized multiline SSE events.
+
+Validation: **32 unit/protocol tests passed, 1 Windows symlink test skipped**;
+20 modules passed syntax checks. Previous checkpoint's seven GitHub CI jobs passed
+on Node 22/24 across Linux, Windows and macOS, including real Docker isolation.
+
+## Provider research decision
+
 OpenCode's current [inference documentation](https://opencode.ai/docs/console/api/inference/)
 restricts free-tier chat inference to OpenCode itself. A direct request was rejected.
 Native free-model access will use OpenRouter or local Ollama. OpenCode access will

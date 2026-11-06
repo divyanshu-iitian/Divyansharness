@@ -107,7 +107,7 @@ export async function main(args=process.argv.slice(2)) {
     assert(['run','plan'].includes(command),`Unknown command ${command}. Run dhaara --help.`);
     return nativeRun(command,rest.join(' '),config,cwd,onEvent,signal);
   });
-  receipt(session,v.json);if(['failed','interrupted','budget-exhausted','verification-failed'].includes(session.status))process.exitCode=1;
+  receipt(session,v.json);if(['failed','interrupted','budget-exhausted','verification-failed','stalled'].includes(session.status))process.exitCode=1;
 }
 async function interactive(config,cwd) {
   banner();console.log('  /help for commands · Ctrl+C cancels a run · /exit to leave\n');
